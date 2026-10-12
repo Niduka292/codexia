@@ -6,8 +6,8 @@ CODEXIA is a themed computer-science competition website built around a deep-spa
 
 | Item | Details |
 | --- | --- |
-| Date | 8 October 2026 |
-| Time | 2:00 PM |
+| Date | 22 October 2026 |
+| Time | 3:00 PM |
 | Venue | NFC 3 — New Faculty Complex 3 |
 | Student ID format | `AS202XXXX` (example: `AS2022123`) |
 | Maximum team size | 5 students, including the team leader |

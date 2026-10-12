@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { CheckCircle2, Plus, Trash2, Zap } from "lucide-react";
 import {
   ALLOWED_ACADEMIC_YEARS,
@@ -421,7 +422,11 @@ export function RegistrationForm() {
       </div>
 
       <p className="font-terminal relative z-10 mt-4 text-center text-xs leading-6 text-slate-600">
-        By submitting, you agree to competition rules, eligibility review, and event communications.
+        By submitting, you agree to{" "}
+        <Link href="/rules" className="text-cyan-400 underline underline-offset-2 hover:text-cyan-300">
+          competition rules
+        </Link>
+        , eligibility review, and event communications.
       </p>
     </form>
   );

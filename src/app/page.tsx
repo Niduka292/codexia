@@ -61,6 +61,9 @@ export default async function Home() {
                 Register Your Team
                 <Zap size={17} />
               </Link>
+              <Link href="/rules" className="codefest-button ghost-button w-full px-8 py-4 text-sm sm:w-auto">
+                Rules & Regulations
+              </Link>
               <a href="#events" className="codefest-button ghost-button w-full px-8 py-4 text-sm sm:w-auto">
                 Explore Challenges
               </a>
@@ -86,9 +89,29 @@ export default async function Home() {
               </div>
             </div>
 
+            {/* Mobile Countdown Section */}
+            <div className="mt-5 lg:hidden glass-panel scanline p-3.5 sm:p-5 text-center">
+              <Image
+                src="/codexia-transparent.png"
+                alt="CODEXIA"
+                width={1280}
+                height={1280}
+                className="relative z-10 mx-auto h-auto w-full max-w-[150px] drop-shadow-[0_0_20px_rgba(0,229,255,0.2)] mb-2"
+              />
+              <p className="font-terminal relative z-10 text-xs font-bold uppercase tracking-wider text-cyan-300">
+                Mission Begins In
+              </p>
+              <div className="relative z-10 mt-2.5">
+                <CountdownTimer targetDate={CODEXIA_EVENT.startsAt} compact />
+              </div>
+              <p className="font-terminal relative z-10 mt-2.5 text-[10px] uppercase tracking-widest text-slate-400">
+                {CODEXIA_EVENT.venueLabel}
+              </p>
+            </div>
+
           </div>
 
-          <aside className="glass-panel scanline p-5 sm:p-7">
+          <aside className="hidden lg:block glass-panel scanline p-5 sm:p-7">
             <Image
               src="/codexia-transparent.png"
               alt="CODEXIA — Level Up Your Logic"

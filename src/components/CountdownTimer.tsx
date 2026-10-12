@@ -26,21 +26,44 @@ export function CountdownTimer({ targetDate, compact = false }: CountdownTimerPr
       });
     }
 
-    let interval: ReturnType<typeof setInterval> | undefined;
-    const boot = window.setTimeout(() => {
-      setMounted(true);
-      calculate();
-      interval = setInterval(calculate, 1000);
-    }, 0);
+    setMounted(true);
+    calculate();
+    const interval = setInterval(calculate, 1000);
 
     return () => {
-      window.clearTimeout(boot);
-      if (interval) clearInterval(interval);
+      clearInterval(interval);
     };
   }, [targetDate]);
 
-  // Don't render on server at all — avoids hydration mismatch
-  if (!mounted) return null;
+  if (!mounted) {
+    // Render responsive placeholder boxes to avoid layout shifts on mobile
+    const placeholderUnits = ["DAYS", "HOURS", "MINS", "SECS"];
+    return (
+      <div className={`grid grid-cols-4 ${compact ? "gap-1.5 sm:gap-2" : "gap-2 sm:gap-3"}`}>
+        {placeholderUnits.map((label) => (
+          <div
+            key={label}
+            className={`glass-panel scanline text-center ${
+              compact
+                ? "px-1.5 py-2.5 min-[380px]:px-2.5 min-[380px]:py-3 sm:px-3 sm:py-4"
+                : "px-2.5 py-3 sm:px-4 sm:py-5"
+            }`}
+          >
+            <div
+              className={`font-display font-black text-cyan-50 drop-shadow-[0_0_18px_rgba(0,229,255,0.3)] tabular-nums ${
+                compact ? "text-xl min-[380px]:text-2xl sm:text-3xl" : "text-3xl sm:text-5xl"
+              }`}
+            >
+              00
+            </div>
+            <div className="font-terminal relative z-10 mt-1 sm:mt-2 text-[8px] min-[380px]:text-[9px] sm:text-[10px] font-bold uppercase tracking-wider sm:tracking-widest text-cyan-200/70">
+              {label}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   const units = [
     { label: "DAYS", value: timeLeft.days },
@@ -50,22 +73,24 @@ export function CountdownTimer({ targetDate, compact = false }: CountdownTimerPr
   ];
 
   const valueClassName = compact
-    ? "font-display text-2xl font-black text-white sm:text-3xl"
-    : "font-display text-4xl font-black text-white sm:text-5xl";
+    ? "font-display text-xl min-[380px]:text-2xl font-black text-white sm:text-3xl"
+    : "font-display text-3xl font-black text-white sm:text-5xl";
 
   return (
-    <div className={`grid grid-cols-4 ${compact ? "gap-2" : "gap-3"}`}>
+    <div className={`grid grid-cols-4 ${compact ? "gap-1.5 sm:gap-2" : "gap-2 sm:gap-3"}`}>
       {units.map((unit) => (
         <div
           key={unit.label}
           className={`glass-panel scanline text-center ${
-            compact ? "px-3 py-4" : "px-4 py-5"
+            compact
+              ? "px-1.5 py-2.5 min-[380px]:px-2.5 min-[380px]:py-3 sm:px-3 sm:py-4"
+              : "px-2.5 py-3 sm:px-4 sm:py-5"
           }`}
         >
-          <div className={`${valueClassName} relative z-10 text-cyan-50 drop-shadow-[0_0_18px_rgba(0,229,255,0.3)]`}>
+          <div className={`${valueClassName} relative z-10 text-cyan-50 drop-shadow-[0_0_18px_rgba(0,229,255,0.3)] tabular-nums`}>
             {String(unit.value).padStart(2, "0")}
           </div>
-          <div className="font-terminal relative z-10 mt-2 text-[10px] font-bold uppercase tracking-widest text-cyan-200/70">
+          <div className="font-terminal relative z-10 mt-1 sm:mt-2 text-[8px] min-[380px]:text-[9px] sm:text-[10px] font-bold uppercase tracking-wider sm:tracking-widest text-cyan-200/70">
             {unit.label}
           </div>
         </div>
