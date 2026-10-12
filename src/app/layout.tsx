@@ -23,6 +23,13 @@ const orbitron = Orbitron({
 export const metadata: Metadata = {
   title: "CODEXIA | Voyager-1 Transmission",
   description: "A classified interstellar computer science mission.",
+  icons: {
+    icon: [
+      { url: "/codexia-transparent.png?v=2", type: "image/png" },
+    ],
+    shortcut: "/codexia-transparent.png?v=2",
+    apple: "/codexia-transparent.png?v=2",
+  },
 };
 
 export default function RootLayout({
@@ -35,6 +42,11 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${spaceGrotesk.variable} ${orbitron.variable} h-full scroll-smooth antialiased`}
     >
+      <head>
+        <link rel="icon" href="/codexia-transparent.png?v=2" type="image/png" sizes="any" />
+        <link rel="shortcut icon" href="/codexia-transparent.png?v=2" />
+        <link rel="apple-touch-icon" href="/codexia-transparent.png?v=2" />
+      </head>
       <body className="mission-shell relative min-h-full bg-void text-white">
         <BlinkingDots />
         <Navbar />
