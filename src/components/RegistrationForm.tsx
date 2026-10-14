@@ -16,11 +16,23 @@ type TeamMember = {
   student_id: string;
 };
 
+type PendingRegistration = {
+  team_name: string;
+  full_name: string;
+  email: string;
+  student_id: string;
+  academic_year: string;
+  team_members: TeamMember[];
+  website: string;
+  form_started_at: number;
+};
+
 const emptyMembers = (): TeamMember[] =>
   Array.from({ length: REQUIRED_ADDITIONAL_MEMBERS }, () => ({ full_name: "", student_id: "" }));
 
 export function RegistrationForm() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(emptyMembers);
+  const [pending, setPending] = useState<PendingRegistration | null>(null);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -121,39 +133,52 @@ export function RegistrationForm() {
       return;
     }
 
+    // Validation passed: show the summary popup before actually submitting.
+    setPending({
+      team_name: teamName,
+      full_name: fullName,
+      email,
+      student_id: studentId,
+      academic_year: academicYear,
+      team_members: cleanedTeamMembers,
+      website: String(form.get("website") ?? ""),
+      form_started_at: Number(form.get("form_started_at")),
+    });
+    setLoading(false);
+  }
+
+  async function confirmSubmit() {
+    if (!pending) return;
+    setLoading(true);
+    setError("");
 
     try {
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          team_name: teamName,
-          full_name: fullName,
-          email: email,
-          student_id: studentId,
-          academic_year: academicYear,
-          team_members: cleanedTeamMembers,
-          website: String(form.get("website") ?? ""),
-          form_started_at: Number(form.get("form_started_at")),
-        }),
+        body: JSON.stringify(pending),
       });
 
       const data = await res.json();
 
       if (!res.ok || data.error) {
         setError(data.error || "Failed to submit registration. Please try again.");
+        setPending(null);
         setLoading(false);
         return;
       }
 
+      setPending(null);
       setSuccess(true);
     } catch (err) {
       console.error(err);
       setError("An unexpected network error occurred. Please try again.");
+      setPending(null);
     } finally {
       setLoading(false);
     }
   }
+
   if (success) {
     return (
       <div className="glass-panel scanline p-8 text-center">
@@ -369,6 +394,76 @@ export function RegistrationForm() {
         </Link>
         , eligibility review, and event communications.
       </p>
+
+      {pending ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Registration summary"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+        >
+          <div className="glass-panel max-h-[90vh] w-full max-w-xl overflow-y-auto p-6 sm:p-8">
+            <h3 className="mission-title text-2xl text-white">Registration Summary</h3>
+            <p className="mt-2 text-sm text-slate-400">Please review your details before confirming.</p>
+
+            <dl className="mt-5 space-y-3 text-sm">
+              <div>
+                <dt className="terminal-label">Team Name</dt>
+                <dd className="text-slate-100">{pending.team_name}</dd>
+              </div>
+              <div>
+                <dt className="terminal-label">Academic Year</dt>
+                <dd className="text-slate-100">{pending.academic_year}</dd>
+              </div>
+              <div>
+                <dt className="terminal-label">Leader Email</dt>
+                <dd className="break-all text-slate-100">{pending.email}</dd>
+              </div>
+              <div>
+                <dt className="terminal-label">Members ({MAX_TEAM_SIZE})</dt>
+                <dd>
+                  <ol className="mt-2 space-y-2">
+                    {[
+                      { full_name: pending.full_name, student_id: pending.student_id, role: "Leader" },
+                      ...pending.team_members.map((m, i) => ({ ...m, role: `Member ${i + 2}` })),
+                    ].map((m) => (
+                      <li
+                        key={m.role}
+                        className="flex items-center justify-between gap-3 border border-cyan-300/15 bg-black/20 px-3 py-2"
+                      >
+                        <span className="text-slate-100">
+                          <span className="font-terminal mr-2 text-xs uppercase text-purple-200">{m.role}</span>
+                          {m.full_name}
+                        </span>
+                        <span className="text-cyan-300" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>{m.student_id.toUpperCase()}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </dd>
+              </div>
+            </dl>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setPending(null)}
+                disabled={loading}
+                className="codefest-button border border-purple-300/25 px-5 py-3 text-sm text-slate-300 hover:border-purple-300/70 hover:text-white"
+              >
+                Edit Details
+              </button>
+              <button
+                type="button"
+                onClick={confirmSubmit}
+                disabled={loading}
+                className="codefest-button signal-button px-5 py-3 text-sm"
+              >
+                {loading ? "Submitting..." : "Confirm & Register"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </form>
   );
 }

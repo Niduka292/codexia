@@ -353,9 +353,6 @@ export default function RulesPage() {
                 Register Your Team
                 <Zap size={15} />
               </Link>
-              <Link href="/leaderboard" className="codefest-button ghost-button w-full sm:w-auto px-5 py-3 text-xs sm:text-sm">
-                View Leaderboard
-              </Link>
               <Link href="/" className="codefest-button ghost-button w-full sm:w-auto px-5 py-3 text-xs sm:text-sm">
                 Back to Mission
               </Link>
