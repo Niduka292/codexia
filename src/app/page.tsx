@@ -189,10 +189,7 @@ export default async function Home() {
                       {module.status}
                     </span>
                   </div>
-                  <p className="font-terminal mt-8 text-base font-bold uppercase tracking-widest text-slate-500">
-                    Domain {module.id}
-                  </p>
-                  <h3 className="font-display mt-3 text-2xl font-black uppercase text-cyan-300">{module.title}</h3>
+                  <h3 className="font-display mt-8 text-2xl font-black uppercase text-cyan-300">{module.title}</h3>
                   <p className="font-terminal mt-3 text-base text-purple-400">{module.type}</p>
                   <p className="mt-5 max-w-sm text-lg leading-8 text-slate-400">{module.copy}</p>
                   <div className="mt-7 h-px bg-cyan-300/25" />
