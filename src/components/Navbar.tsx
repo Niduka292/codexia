@@ -2,16 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Grid2X2, Menu, Satellite, ScrollText, Trophy, UserPlus, X } from "lucide-react";
+import { Menu, Satellite, ScrollText, UserPlus, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 const navLinks = [
   { href: "/", label: "Mission", icon: Satellite, match: "/" },
   { href: "/rules", label: "Rules", icon: ScrollText, match: "/rules" },
-  { href: "/leaderboard", label: "Leaderboard", icon: Trophy, match: "/leaderboard" },
   { href: "/register", label: "Register", icon: UserPlus, match: "/register" },
-  { href: "/admin/login", label: "Admin", icon: Grid2X2, match: "/admin" },
 ];
 
 export function Navbar() {

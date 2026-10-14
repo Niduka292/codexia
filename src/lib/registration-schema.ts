@@ -1,8 +1,7 @@
 import { z } from "zod";
 import {
   ALLOWED_ACADEMIC_YEARS,
-  ALLOWED_LANGUAGES,
-  MAX_ADDITIONAL_MEMBERS,
+  REQUIRED_ADDITIONAL_MEMBERS,
   STUDENT_ID_HELP,
   STUDENT_ID_PATTERN,
 } from "@/lib/registration-options";
@@ -27,15 +26,12 @@ export const registrationSchema = z
     email: z.string().trim().toLowerCase().max(254).email("Enter a valid email address."),
     student_id: studentIdSchema,
     academic_year: z.enum(ALLOWED_ACADEMIC_YEARS),
-    programming_languages: z
-      .array(z.enum(ALLOWED_LANGUAGES))
-      .min(1, "Select at least one programming language.")
-      .max(ALLOWED_LANGUAGES.length)
-      .refine((values) => new Set(values).size === values.length, "Programming languages must be unique."),
-    team_members: z.array(teamMemberSchema).max(
-      MAX_ADDITIONAL_MEMBERS,
-      `A team can include no more than ${MAX_ADDITIONAL_MEMBERS} additional members.`,
-    ),
+    team_members: z
+      .array(teamMemberSchema)
+      .length(
+        REQUIRED_ADDITIONAL_MEMBERS,
+        `A team must have exactly ${REQUIRED_ADDITIONAL_MEMBERS + 1} members (the leader plus ${REQUIRED_ADDITIONAL_MEMBERS} more).`,
+      ),
     website: z.string().max(200).optional().default(""),
     form_started_at: z.number().int().positive(),
   })

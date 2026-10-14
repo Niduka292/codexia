@@ -5,8 +5,8 @@ import Link from "next/link";
 import { CheckCircle2, Plus, Trash2, Zap } from "lucide-react";
 import {
   ALLOWED_ACADEMIC_YEARS,
-  ALLOWED_LANGUAGES,
-  MAX_ADDITIONAL_MEMBERS,
+  MAX_TEAM_SIZE,
+  REQUIRED_ADDITIONAL_MEMBERS,
   STUDENT_ID_HELP,
   STUDENT_ID_PATTERN,
 } from "@/lib/registration-options";
@@ -16,9 +16,11 @@ type TeamMember = {
   student_id: string;
 };
 
+const emptyMembers = (): TeamMember[] =>
+  Array.from({ length: REQUIRED_ADDITIONAL_MEMBERS }, () => ({ full_name: "", student_id: "" }));
+
 export function RegistrationForm() {
-  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(["Python"]);
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([{ full_name: "", student_id: "" }]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(emptyMembers);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -32,28 +34,12 @@ export function RegistrationForm() {
     }
   }, [error]);
 
-  function toggleLanguage(language: string) {
-    setSelectedLanguages((current) =>
-      current.includes(language) ? current.filter((item) => item !== language) : [...current, language],
-    );
-  }
-
   function updateTeamMember(index: number, field: keyof TeamMember, value: string) {
     setTeamMembers((current) =>
       current.map((member, memberIndex) =>
         memberIndex === index ? { ...member, [field]: value } : member,
       ),
     );
-  }
-
-  function addTeamMember() {
-    setTeamMembers((current) =>
-      current.length >= MAX_ADDITIONAL_MEMBERS ? current : [...current, { full_name: "", student_id: "" }],
-    );
-  }
-
-  function removeTeamMember(index: number) {
-    setTeamMembers((current) => current.filter((_, memberIndex) => memberIndex !== index));
   }
 
   function goToMembersStep(form: HTMLFormElement) {
@@ -68,11 +54,10 @@ export function RegistrationForm() {
       String(formData.get("team_name") ?? "").trim() &&
       String(formData.get("full_name") ?? "").trim() &&
       String(formData.get("email") ?? "").trim() &&
-      String(formData.get("student_id") ?? "").trim() &&
-      selectedLanguages.length > 0;
+      String(formData.get("student_id") ?? "").trim();
 
     if (!hasLeaderDetails) {
-      setError("Team name, leader details, and at least one language are required.");
+      setError("Team name and leader details are required.");
       return;
     }
 
@@ -97,16 +82,14 @@ export function RegistrationForm() {
     const studentId = String(form.get("student_id") ?? "").trim();
     const academicYear = String(form.get("academic_year") ?? "");
 
-    const cleanedTeamMembers = teamMembers
-      .map((member) => ({
-        full_name: member.full_name.trim(),
-        student_id: member.student_id.trim(),
-      }))
-      .filter((member) => member.full_name || member.student_id);
+    const cleanedTeamMembers = teamMembers.map((member) => ({
+      full_name: member.full_name.trim(),
+      student_id: member.student_id.trim(),
+    }));
 
     // Validation
-    if (!teamName || !fullName || !email || !studentId || selectedLanguages.length === 0) {
-      setError("Team name, leader details, and at least one language are required.");
+    if (!teamName || !fullName || !email || !studentId) {
+      setError("Team name and leader details are required.");
       setLoading(false);
       return;
     }
@@ -116,7 +99,7 @@ export function RegistrationForm() {
     );
 
     if (hasIncompleteMember) {
-      setError("Each team member needs both a full name and student ID.");
+      setError(`A team must have exactly ${MAX_TEAM_SIZE} members. Each member needs a name with initials and a student ID.`);
       setLoading(false);
       return;
     }
@@ -138,6 +121,7 @@ export function RegistrationForm() {
       return;
     }
 
+
     try {
       const res = await fetch("/api/register", {
         method: "POST",
@@ -148,7 +132,6 @@ export function RegistrationForm() {
           email: email,
           student_id: studentId,
           academic_year: academicYear,
-          programming_languages: selectedLanguages,
           team_members: cleanedTeamMembers,
           website: String(form.get("website") ?? ""),
           form_started_at: Number(form.get("form_started_at")),
@@ -252,11 +235,11 @@ export function RegistrationForm() {
           </label>
 
           <label className="block">
-            <span className="terminal-label mb-2 block">Team Leader Name</span>
+            <span className="terminal-label mb-2 block">Team Leader Name (with initials)</span>
             <input
               name="full_name"
               type="text"
-              placeholder="TEAM LEADER NAME"
+              placeholder="K.A.S. PERERA"
               className="codefest-field"
               minLength={2}
               maxLength={80}
@@ -283,38 +266,17 @@ export function RegistrationForm() {
               <input
                 name="student_id"
                 type="text"
-                placeholder="AS202XXXX"
+                placeholder="AS2023508"
                 className="codefest-field font-mono uppercase"
-                maxLength={9}
+                maxLength={12}
                 title={STUDENT_ID_HELP}
                 autoComplete="off"
                 required
               />
-              <span className="mt-2 block text-xs leading-5 text-slate-400">Format: AS202XXXX · Example: AS2023508</span>
+              <span className="mt-2 block text-xs leading-5 text-slate-400">Example: AS2023508 or AS20250123</span>
             </label>
           </div>
 
-          <div>
-            <span className="terminal-label mb-3 block">
-              Programming Languages
-            </span>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {ALLOWED_LANGUAGES.map((language) => (
-                <label
-                  key={language}
-                  className="flex cursor-pointer items-center gap-3 border border-cyan-300/15 bg-cyan-300/[0.04] px-4 py-3 text-sm font-bold text-slate-200 transition-all duration-300 hover:border-purple-300/60 hover:bg-purple-500/10 hover:shadow-violet"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedLanguages.includes(language)}
-                    onChange={() => toggleLanguage(language)}
-                    className="h-4 w-4 accent-cyan-300"
-                  />
-                  {language}
-                </label>
-              ))}
-            </div>
-          </div>
 
           <label className="block">
             <span className="terminal-label mb-2 block">Leader Academic Year</span>
@@ -343,30 +305,17 @@ export function RegistrationForm() {
           </div>
 
           <div>
-            <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <span className="terminal-label block">
-                Additional Team Members
-              </span>
-              <button
-                type="button"
-                onClick={addTeamMember}
-                disabled={teamMembers.length >= MAX_ADDITIONAL_MEMBERS}
-                className="codefest-button ghost-button px-3 py-2 text-[10px]"
-              >
-                <Plus size={14} />
-                Add Member
-              </button>
-            </div>
+            <span className="terminal-label mb-3 block">Team Members 2 – {MAX_TEAM_SIZE}</span>
 
             <div className="space-y-3">
               {teamMembers.map((member, index) => (
-                <div key={index} className="grid gap-3 border border-cyan-300/15 bg-black/20 p-3 md:grid-cols-[1fr_0.8fr_auto]">
+                <div key={index} className="grid gap-3 border border-cyan-300/15 bg-black/20 p-3 md:grid-cols-2">
                   <input
                     type="text"
                     value={member.full_name}
                     onChange={(event) => updateTeamMember(index, "full_name", event.target.value)}
-                    placeholder={`MEMBER ${index + 2} FULL NAME`}
-                    aria-label={`Member ${index + 2} full name`}
+                    placeholder={`MEMBER ${index + 2} NAME WITH INITIALS`}
+                    aria-label={`Member ${index + 2} name with initials`}
                     className="codefest-field"
                     minLength={2}
                     maxLength={80}
@@ -376,30 +325,22 @@ export function RegistrationForm() {
                     type="text"
                     value={member.student_id}
                     onChange={(event) => updateTeamMember(index, "student_id", event.target.value)}
-                    placeholder="AS202XXXX"
+                    placeholder="AS2023508"
                     aria-label={`Member ${index + 2} student ID`}
                     className="codefest-field font-mono uppercase"
-                    maxLength={9}
+                    maxLength={12}
                     title={STUDENT_ID_HELP}
                     autoComplete="off"
                   />
-                  <button
-                    type="button"
-                    onClick={() => removeTeamMember(index)}
-                    disabled={teamMembers.length === 1}
-                    aria-label="Remove team member"
-                    className="inline-flex h-12 items-center justify-center border border-red-400/30 px-4 text-red-300 transition-all duration-300 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    <Trash2 size={17} />
-                  </button>
                 </div>
               ))}
             </div>
 
             <p className="font-terminal mt-2 text-xs uppercase tracking-widest text-slate-600">
-              Add up to {MAX_ADDITIONAL_MEMBERS} more members. Student ID format: AS202XXXX (example: AS2023508).
+              A team must have exactly {MAX_TEAM_SIZE} members. Use names with initials (e.g. K.A.S. Perera).
             </p>
           </div>
+
 
           <div className="grid gap-3 sm:grid-cols-[auto_1fr]">
             <button

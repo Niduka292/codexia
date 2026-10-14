@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
     email: parsed.data.email,
     student_id: parsed.data.student_id,
     academic_year: parsed.data.academic_year,
-    programming_languages: parsed.data.programming_languages,
+    programming_languages: [] as string[],
     team_members: parsed.data.team_members,
   };
 
