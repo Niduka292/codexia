@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { CheckCircle2, Plus, Trash2, Zap } from "lucide-react";
 import {
@@ -395,14 +396,15 @@ export function RegistrationForm() {
         , eligibility review, and event communications.
       </p>
 
-      {pending ? (
+      {pending
+        ? createPortal(
         <div
           role="dialog"
           aria-modal="true"
           aria-label="Registration summary"
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
         >
-          <div className="glass-panel max-h-[90vh] w-full max-w-xl overflow-y-auto p-6 sm:p-8">
+          <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-lg border border-cyan-300/30 bg-[#0a1223] p-6 shadow-2xl sm:p-8">
             <h3 className="mission-title text-2xl text-white">Registration Summary</h3>
             <p className="mt-2 text-sm text-slate-400">Please review your details before confirming.</p>
 
@@ -462,8 +464,10 @@ export function RegistrationForm() {
               </button>
             </div>
           </div>
-        </div>
-      ) : null}
+        </div>,
+        document.body,
+      )
+        : null}
     </form>
   );
 }
