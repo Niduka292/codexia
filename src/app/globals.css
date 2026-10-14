@@ -459,3 +459,15 @@ body::after {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Dark-themed native dropdowns (select) */
+select.codefest-field {
+  color-scheme: dark;
+  cursor: pointer;
+}
+
+select.codefest-field option {
+  background-color: #0b1020;
+  color: #ffffff;
+}
+
