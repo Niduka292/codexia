@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Orbitron, Space_Grotesk } from "next/font/google";
 import { BlinkingDots } from "@/components/BlinkingDots";
 import { Navbar } from "@/components/Navbar";
+import { RegistrationAlertModal } from "@/components/RegistrationAlertModal";
 import "./globals.css";
 
 const inter = Inter({
@@ -50,6 +51,7 @@ export default function RootLayout({
       <body className="mission-shell relative min-h-full bg-void text-white">
         <BlinkingDots />
         <Navbar />
+        <RegistrationAlertModal />
         <main className="relative z-10 min-h-screen">{children}</main>
       </body>
     </html>
