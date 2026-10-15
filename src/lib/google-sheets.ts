@@ -168,13 +168,14 @@ export async function getRegistrationRecords(): Promise<RegistrationRecord[]> {
     }
 
     const result = await parseSheetsResponse(response);
-    if (result.status !== "success" || !Array.isArray(result.registrations)) {
-      throw new Error(result.message || "Invalid registrations response");
+    if (result.status === "success" && Array.isArray(result.registrations)) {
+      return result.registrations as RegistrationRecord[];
     }
 
-    return result.registrations as RegistrationRecord[];
+    // Graceful fallback to local registrations if Google Sheets returned unexpected format
+    return getSavedRegistrations();
   } catch (error) {
-    console.error("Failed to read registrations from Google Sheets:", error);
-    return [];
+    console.warn("Failed to read registrations from Google Sheets, using local registrations fallback:", error);
+    return getSavedRegistrations();
   }
 }
