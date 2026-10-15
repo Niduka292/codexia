@@ -154,7 +154,7 @@ export default async function Home() {
               </div>
               <div>
                 <p className="font-terminal text-base font-bold uppercase tracking-widest text-slate-400">Eligibility</p>
-                <p className="font-display mt-2 text-2xl font-black text-emerald-400">All CS Students</p>
+                <p className="font-display mt-2 text-2xl font-black text-emerald-400">All Students of DCS</p>
               </div>
             </div>
             <div className="relative z-10 mt-7 h-3 overflow-hidden rounded-full bg-[#030712]">
