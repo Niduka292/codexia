@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getSavedRegistrations, saveRegistrationRecord } from "@/lib/registrations";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -142,10 +143,9 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const duplicateError = findDuplicate(parsed.data);
-  if (duplicateError) {
-    return NextResponse.json({ error: duplicateError }, { status: 409 });
-  }
+  const webhookUrl =
+    process.env.GOOGLE_SHEETS_WEBHOOK_URL ||
+    process.env.NEXT_PUBLIC_GOOGLE_SHEETS_WEBHOOK_URL;
 
   const registration = {
     team_name: parsed.data.team_name,
@@ -157,51 +157,77 @@ export async function POST(request: NextRequest) {
     team_members: parsed.data.team_members,
   };
 
+  // Google Sheets is the source of truth when configured; local files are only a dev fallback.
+  if (!webhookUrl?.trim()) {
+    const duplicateError = findDuplicate(parsed.data);
+    if (duplicateError) {
+      return NextResponse.json({ error: duplicateError }, { status: 409 });
+    }
+  }
+
   try {
-    const savedRecord = saveRegistrationRecord({
+    const savedRecord = {
+      id: `reg-${randomUUID()}`,
       submitted_at: new Date().toISOString(),
       ...registration,
-    });
-
-    const webhookUrl =
-      process.env.GOOGLE_SHEETS_WEBHOOK_URL ||
-      process.env.NEXT_PUBLIC_GOOGLE_SHEETS_WEBHOOK_URL;
+    };
 
     let webhookStatus = "not_configured";
 
     if (webhookUrl?.trim()) {
+      const formattedMembers = savedRecord.team_members
+        .map((member) => `${member?.full_name || ""} (ID: ${member?.student_id || ""})`)
+        .join("; ");
+
+      const formParams = new URLSearchParams();
+      formParams.append("submitted_at", savedRecord.submitted_at);
+      formParams.append("team_name", savedRecord.team_name || "");
+      formParams.append("full_name", savedRecord.full_name || "");
+      formParams.append("email", savedRecord.email || "");
+      formParams.append("student_id", savedRecord.student_id || "");
+      formParams.append("academic_year", savedRecord.academic_year || "");
+      formParams.append("programming_languages", "");
+      formParams.append("team_members", formattedMembers);
+
+      let result: { status?: string; message?: string } = {};
       try {
-        const membersList = Array.isArray(savedRecord.team_members)
-          ? savedRecord.team_members.map((member) => `${member?.full_name || ""} (ID: ${member?.student_id || ""})`)
-          : [];
-        const formattedMembers = membersList.join("; ");
-
-        const langs = Array.isArray(savedRecord.programming_languages)
-          ? savedRecord.programming_languages.join(", ")
-          : String(savedRecord.programming_languages || "");
-
-        const formParams = new URLSearchParams();
-        formParams.append("submitted_at", savedRecord.submitted_at || new Date().toISOString());
-        formParams.append("team_name", savedRecord.team_name || "");
-        formParams.append("full_name", savedRecord.full_name || "");
-        formParams.append("email", savedRecord.email || "");
-        formParams.append("student_id", savedRecord.student_id || "");
-        formParams.append("academic_year", savedRecord.academic_year || "");
-        formParams.append("programming_languages", langs);
-        formParams.append("team_members", formattedMembers);
-
         const response = await fetch(webhookUrl.trim(), {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: formParams.toString(),
           redirect: "follow",
+          cache: "no-store",
+          signal: AbortSignal.timeout(15_000),
         });
-
-        webhookStatus = response.ok ? "success" : `failed_status_${response.status}`;
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        result = JSON.parse(await response.text());
       } catch (error) {
         console.error("Error forwarding registration to Google Sheets webhook:", error);
-        webhookStatus = "webhook_error";
+        return NextResponse.json(
+          { error: "Could not save your registration. Please try again." },
+          { status: 502 },
+        );
       }
+
+      if (result.status === "duplicate") {
+        return NextResponse.json(
+          { error: result.message || "This registration already exists." },
+          { status: 409 },
+        );
+      }
+      if (result.status !== "success") {
+        console.error("Google Sheets rejected registration:", result);
+        return NextResponse.json(
+          { error: "Could not save your registration. Please try again." },
+          { status: 502 },
+        );
+      }
+      webhookStatus = "success";
+    } else {
+      saveRegistrationRecord({
+        submitted_at: savedRecord.submitted_at,
+        ...registration,
+      });
     }
 
     return NextResponse.json({

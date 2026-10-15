@@ -67,8 +67,42 @@ function doGet(e) {
 }
 
 // doPost records new Team Registrations into "Registrations" tab
+function norm_(v) {
+  return String(v || "").trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+// Extracts student IDs from text like "Name (ID: AS2023659); Name2 (AS2023111)"
+function idsFromMembers_(text) {
+  var ids = [];
+  var re = /\((?:ID:\s*)?([^)]+)\)/gi;
+  var m;
+  while ((m = re.exec(String(text || ""))) !== null) ids.push(norm_(m[1]));
+  return ids;
+}
+
+// Returns a duplicate message if the submission clashes with an existing row, else null
+function findDuplicate_(sheet, data) {
+  var rows = sheet.getDataRange().getValues();
+  var team = norm_(data.team_name);
+  var email = norm_(data.email);
+  var submitted = [norm_(data.student_id)].concat(idsFromMembers_(data.team_members)).filter(Boolean);
+
+  for (var i = 1; i < rows.length; i++) {
+    var r = rows[i];
+    if (team && norm_(r[1]) === team) return "That team name is already registered.";
+    if (email && norm_(r[3]) === email) return "A registration already exists for this email address.";
+    var existing = [norm_(r[4])].concat(idsFromMembers_(r[7])).filter(Boolean);
+    for (var j = 0; j < existing.length; j++) {
+      if (submitted.indexOf(existing[j]) !== -1) return "One or more student IDs have already been registered.";
+    }
+  }
+  return null;
+}
+
 function doPost(e) {
+  var lock = LockService.getScriptLock();
   try {
+    lock.waitLock(10000);
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheetByName(REGISTRATION_SHEET_NAME);
     if (!sheet) {
@@ -98,6 +132,13 @@ function doPost(e) {
 
     var membersStr = data.team_members || '';
 
+    var dupMessage = findDuplicate_(sheet, data);
+    if (dupMessage) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: "duplicate", message: dupMessage }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     sheet.appendRow([
       data.submitted_at || new Date().toISOString(),
       data.team_name || '',
@@ -116,6 +157,8 @@ function doPost(e) {
     return ContentService
       .createTextOutput(JSON.stringify({ status: "error", message: error.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    try { lock.releaseLock(); } catch (e2) {}
   }
 }
 ```
