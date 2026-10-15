@@ -36,7 +36,7 @@ const registrationRules = [
   {
     number: "02",
     title: "Who may participate",
-    text: "All five members must be students of the Department of Computer Science, University of Sri Jayewardenepura, including ICT students. Every member of a team must belong to the same academic year.",
+    text: "All five members must be students of the Department of Computer Science, University of Sri Jayewardenepura. Every member of a team must belong to the same academic year.",
     icon: UserCheck,
   },
   {
