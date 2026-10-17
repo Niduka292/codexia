@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Cpu, ExternalLink, FileSpreadsheet, GitFork, LockKeyhole, RefreshCw, Trophy, Users } from "lucide-react";
 import { AdminSidebar } from "@/components/AdminSidebar";
+import { AdminTimerControl } from "@/components/AdminTimerControl";
 import type { RegistrationRecord } from "@/lib/registrations";
 import type { LeaderboardTeam } from "@/lib/leaderboard";
 
@@ -47,6 +48,7 @@ export function AdminDashboardClient({
       <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
       <section className="px-4 py-8 sm:px-6 lg:px-10">
+        <AdminTimerControl />
         {/* Tab 1: Teams Data */}
         {activeTab === "teams" ? (
           <div>

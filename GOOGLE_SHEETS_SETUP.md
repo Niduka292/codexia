@@ -150,6 +150,47 @@ function doGet(e) {
 // ==========================================
 // 2. doPost: Saves Registration & Sends Email
 // ==========================================
+// doPost records new Team Registrations into "Registrations" tab
+function norm_(v) {
+  return String(v || "").trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+// Extracts student IDs from text like "Name (ID: AS2023659); Name2 (AS2023111)"
+function idsFromMembers_(text) {
+  var ids = [];
+  var re = /\((?:ID:\s*)?([^)]+)\)/gi;
+  var m;
+  while ((m = re.exec(String(text || ""))) !== null) ids.push(norm_(m[1]));
+  return ids;
+}
+
+// Returns a duplicate message if the submission clashes with an existing row, else null
+function findDuplicate_(sheet, data) {
+  var rows = sheet.getDataRange().getValues();
+  var team = norm_(data.team_name);
+  var email = norm_(data.email);
+  var submitted = [norm_(data.student_id)].concat(idsFromMembers_(data.team_members)).filter(Boolean);
+
+  // Scan every cell so this works regardless of column order
+  for (var i = 1; i < rows.length; i++) {
+    var cells = [];
+    var ids = [];
+    for (var c = 0; c < rows[i].length; c++) {
+      var cell = norm_(rows[i][c]);
+      if (!cell) continue;
+      cells.push(cell);
+      ids.push(cell);
+      ids = ids.concat(idsFromMembers_(rows[i][c]));
+    }
+    if (team && cells.indexOf(team) !== -1) return "That team name is already registered.";
+    if (email && cells.indexOf(email) !== -1) return "A registration already exists for this email address.";
+    for (var j = 0; j < submitted.length; j++) {
+      if (ids.indexOf(submitted[j]) !== -1) return "One or more student IDs have already been registered.";
+    }
+  }
+  return null;
+}
+
 function doPost(e) {
   var lock = LockService.getScriptLock();
   try {
@@ -186,7 +227,7 @@ function doPost(e) {
     var dupMessage = findDuplicate_(sheet, data);
     if (dupMessage) {
       return ContentService
-        .createTextOutput(JSON.stringify({ status: "duplicate", message: dupMessage }))
+        .createTextOutput(JSON.stringify({ status: "duplicate", version: 2, message: dupMessage }))
         .setMimeType(ContentService.MimeType.JSON);
     }
 
@@ -211,7 +252,7 @@ function doPost(e) {
     }
 
     return ContentService
-      .createTextOutput(JSON.stringify({ status: "success", message: "Registration recorded successfully." }))
+      .createTextOutput(JSON.stringify({ status: "success", version: 2, message: "Registration recorded successfully." }))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     return ContentService

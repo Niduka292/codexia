@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { CalendarDays, Clock3, Cpu, GitFork, LockKeyhole, MapPin, Radio, Zap } from "lucide-react";
 import { CountdownTimer } from "@/components/CountdownTimer";
+import { SpaceTimerOverlay } from "@/components/SpaceTimerOverlay";
 import { CODEXIA_EVENT } from "@/lib/event";
 
 const modules = [
@@ -37,6 +38,7 @@ const modules = [
 export default async function Home() {
   return (
     <div className="overflow-hidden">
+      <SpaceTimerOverlay />
       <section className="relative flex min-h-[calc(100vh-88px)] items-center px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto grid w-full max-w-[1240px] gap-10 lg:grid-cols-[1.18fr_0.82fr] lg:items-center">
           <div className="text-center lg:text-left">
