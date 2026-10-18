@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Orbitron, Space_Grotesk } from "next/font/google";
 import { BlinkingDots } from "@/components/BlinkingDots";
+import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { RegistrationAlertModal } from "@/components/RegistrationAlertModal";
 import "./globals.css";
@@ -53,6 +54,7 @@ export default function RootLayout({
         <Navbar />
         <RegistrationAlertModal />
         <main className="relative z-10 min-h-screen">{children}</main>
+        <Footer />
       </body>
     </html>
   );

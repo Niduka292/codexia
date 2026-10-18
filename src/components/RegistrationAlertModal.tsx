@@ -121,7 +121,7 @@ export function RegistrationAlertModal() {
             Slots are allocated on a strict <strong>first-come, first-served</strong> basis. Lock in your squad before the registration uplink closes!
           </p>
 
-          {/* Slot Capacity Progress Bar (Clean Cyan & Sky-Blue, no '6 out of 10' line) */}
+          {/* Slot Capacity Progress Bar (80% Bar Width) */}
           <div className="mt-3.5 sm:mt-4 rounded-lg border border-cyan-400/25 bg-[#030712]/70 p-3 sm:p-3.5">
             <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-terminal font-bold tracking-wider uppercase mb-2">
               <span className="flex items-center gap-1.5 text-cyan-300 truncate">
@@ -133,17 +133,17 @@ export function RegistrationAlertModal() {
               </span>
             </div>
 
-            {/* Multicolor Progress Bar matching official website colors */}
+            {/* Multicolor Progress Bar matching official website colors (80% full) */}
             <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-slate-900 border border-cyan-400/30">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-cyan-300 via-purple-400 to-amber-300 shadow-signal shadow-[0_0_18px_rgba(0,229,255,0.5)] transition-all duration-1000"
-                style={{ width: "60%" }}
+                style={{ width: "80%" }}
               />
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite]" />
             </div>
 
             <div className="mt-1.5 flex items-center justify-between text-[9px] sm:text-[10px] font-terminal uppercase tracking-wider text-slate-400">
-              <span>Rule 04: First-Come First-Served</span>
+              <span className="truncate mr-2">Rule 04: First-Come First-Served</span>
               <span className="text-cyan-300 font-bold shrink-0">10 Max Slots</span>
             </div>
           </div>
