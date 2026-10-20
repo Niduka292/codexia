@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarDays, Clock3, MapPin, Phone, Radio, Satellite, ScrollText, UserPlus, Zap } from "lucide-react";
+import { CalendarDays, Clock3, LockKeyhole, MapPin, Phone, Radio, Satellite, ScrollText, UserPlus, Zap } from "lucide-react";
 import { CODEXIA_EVENT } from "@/lib/event";
 
 function WhatsAppIcon({ className = "h-3.5 w-3.5" }: { className?: string }) {
@@ -172,13 +172,23 @@ export function Footer() {
             </ul>
 
             <div className="pt-2">
-              <Link
-                href="/register"
-                className="codefest-button signal-button w-full py-2.5 text-xs font-terminal inline-flex items-center justify-center gap-2"
-              >
-                <span>Register Team</span>
-                <Zap size={13} />
-              </Link>
+              {CODEXIA_EVENT.registrationsOpen ? (
+                <Link
+                  href="/register"
+                  className="codefest-button signal-button w-full py-2.5 text-xs font-terminal inline-flex items-center justify-center gap-2"
+                >
+                  <span>Register Team</span>
+                  <Zap size={13} />
+                </Link>
+              ) : (
+                <Link
+                  href="/register"
+                  className="codefest-button ghost-button w-full py-2.5 text-xs font-terminal inline-flex items-center justify-center gap-2 border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20"
+                >
+                  <LockKeyhole size={13} />
+                  <span>Registrations Closed</span>
+                </Link>
+              )}
             </div>
           </div>
         </div>

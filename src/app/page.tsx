@@ -62,10 +62,20 @@ export default async function Home() {
             </p>
 
             <div className="mt-7 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
-              <Link href="/register" className="codefest-button signal-button w-full px-8 py-4 text-sm sm:w-auto">
-                Register Your Team
-                <Zap size={17} />
-              </Link>
+              {CODEXIA_EVENT.registrationsOpen ? (
+                <Link href="/register" className="codefest-button signal-button w-full px-8 py-4 text-sm sm:w-auto">
+                  Register Your Team
+                  <Zap size={17} />
+                </Link>
+              ) : (
+                <Link
+                  href="/register"
+                  className="codefest-button ghost-button w-full px-8 py-4 text-sm sm:w-auto border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20"
+                >
+                  <LockKeyhole size={17} />
+                  Registrations Closed
+                </Link>
+              )}
               <Link href="/rules" className="codefest-button ghost-button w-full px-8 py-4 text-sm sm:w-auto">
                 Rules & Regulations
               </Link>
@@ -241,13 +251,34 @@ export default async function Home() {
       <section className="px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-[960px] text-center">
           <Zap className="mx-auto text-cyan-300" size={42} />
-          <h2 className="page-gradient-title mt-5 text-5xl sm:text-7xl">Authorize Uplink</h2>
+          <h2 className="page-gradient-title mt-5 text-5xl sm:text-7xl">
+            {CODEXIA_EVENT.registrationsOpen ? "Authorize Uplink" : "Transmission Uplink Closed"}
+          </h2>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-400">
-            Assemble your crew and enter the protocol before the final transmission window closes.
+            {CODEXIA_EVENT.registrationsOpen
+              ? "Assemble your crew and enter the protocol before the final transmission window closes."
+              : "Registrations for CODEXIA 2026 are officially closed. All squad allocations are locked into the mission roster."}
           </p>
-          <Link href="/register" className="codefest-button signal-button mt-9 px-10 py-5 text-sm">
-            Register Team
-          </Link>
+          <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
+            {CODEXIA_EVENT.registrationsOpen ? (
+              <Link href="/register" className="codefest-button signal-button px-10 py-5 text-sm">
+                Register Team
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/register"
+                  className="codefest-button ghost-button px-8 py-4 text-sm border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20"
+                >
+                  <LockKeyhole size={16} />
+                  Registration Status
+                </Link>
+                <Link href="/rules" className="codefest-button signal-button px-8 py-4 text-sm">
+                  View Rules & Regulations
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </section>
     </div>

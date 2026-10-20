@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSavedRegistrations, saveRegistrationRecord } from "@/lib/registrations";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { registrationSchema, type ValidatedRegistration } from "@/lib/registration-schema";
+import { CODEXIA_EVENT } from "@/lib/event";
 
 export const runtime = "nodejs";
 
@@ -64,6 +65,13 @@ function findDuplicate(registration: ValidatedRegistration) {
 }
 
 export async function POST(request: NextRequest) {
+  if (!CODEXIA_EVENT.registrationsOpen) {
+    return NextResponse.json(
+      { error: "Registrations for CODEXIA 2026 are officially closed." },
+      { status: 403 }
+    );
+  }
+
   const contentLength = Number(request.headers.get("content-length") || 0);
   if (contentLength > MAX_REQUEST_BYTES) {
     return NextResponse.json({ error: "Registration data is too large." }, { status: 413 });

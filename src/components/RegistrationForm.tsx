@@ -11,6 +11,7 @@ import {
   STUDENT_ID_HELP,
   STUDENT_ID_PATTERN,
 } from "@/lib/registration-options";
+import { CODEXIA_EVENT } from "@/lib/event";
 
 type TeamMember = {
   full_name: string;
@@ -85,6 +86,10 @@ export function RegistrationForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!CODEXIA_EVENT.registrationsOpen) {
+      setError("Registrations for CODEXIA 2026 are officially closed.");
+      return;
+    }
     setLoading(true);
     setError("");
 
