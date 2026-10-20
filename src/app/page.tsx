@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarDays, Clock3, Cpu, GitFork, LockKeyhole, MapPin, Radio, Zap } from "lucide-react";
+import { CalendarDays, Clock3, Code2, Cpu, LockKeyhole, MapPin, Radio, Zap } from "lucide-react";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { SpaceTimerOverlay } from "@/components/SpaceTimerOverlay";
 import { CODEXIA_EVENT } from "@/lib/event";
@@ -8,10 +8,11 @@ import { CODEXIA_EVENT } from "@/lib/event";
 const modules = [
   {
     id: "01",
-    title: "Data Structures & Algorithms",
-    type: "Core CS",
-    copy: "Optimize data layout, dynamic programming, tree traversals, graph search, and algorithmic complexity.",
-    icon: GitFork,
+    title: "C Programming",
+    type: "Procedural & Systems",
+    copy: "Pointer arithmetic, dynamic memory allocation (malloc/free), bitwise operations, structures, recursion, and low-level algorithmic problem-solving.",
+    topics: ["Pointers & Memory", "Dynamic Allocation", "Bitwise Manipulation", "Structs & Unions", "Recursion & I/O"],
+    icon: Code2,
     status: "ACTIVE",
     color: "cyan",
   },
@@ -19,7 +20,8 @@ const modules = [
     id: "02",
     title: "Computer Security",
     type: "Cybersecurity",
-    copy: "Cryptographic protocol analysis, vulnerability exploitation, payload defense, and reverse engineering.",
+    copy: "Cryptographic protocol analysis, vulnerability exploitation, payload defense, and reverse engineering protocols.",
+    topics: ["Cryptographic Ciphers", "Payload Analysis", "Vulnerability Defense", "Reverse Engineering"],
     icon: LockKeyhole,
     status: "ACTIVE",
     color: "purple",
@@ -29,6 +31,7 @@ const modules = [
     title: "Computer System Organization",
     type: "Systems & Hardware",
     copy: "Low-level memory management, assembly instructions, CPU architecture, and operating system kernels.",
+    topics: ["CPU Architecture", "Assembly Instructions", "Memory Hierarchy", "Kernel Fundamentals"],
     icon: Cpu,
     status: "ACTIVE",
     color: "amber",
@@ -175,26 +178,59 @@ export default async function Home() {
                     ? "border-purple-400/35 text-purple-400"
                     : "border-amber-300/35 text-amber-300";
 
+              const typeColor =
+                module.color === "cyan"
+                  ? "text-cyan-300"
+                  : module.color === "purple"
+                    ? "text-purple-400"
+                    : "text-amber-300";
+
               return (
-                <article key={module.id} className="module-card p-7 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-300/50 hover:shadow-signal">
-                  <div className="flex items-start justify-between">
-                    <div className={`flex h-20 w-20 items-center justify-center rounded-lg border bg-current/10 ${accent}`}>
-                      <Icon size={38} />
+                <article
+                  key={module.id}
+                  className="module-card flex flex-col justify-between p-6 sm:p-7 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-300/50 hover:shadow-signal"
+                >
+                  <div>
+                    <div className="flex items-start justify-between">
+                      <div className={`flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-lg border bg-current/10 ${accent}`}>
+                        <Icon size={34} />
+                      </div>
+                      <span
+                        className={`font-terminal rounded border px-2.5 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold uppercase ${
+                          isActive
+                            ? "border-emerald-400/60 bg-emerald-400/10 text-emerald-400"
+                            : "border-red-400/60 bg-red-500/10 text-red-400"
+                        }`}
+                      >
+                        {module.status}
+                      </span>
                     </div>
-                    <span
-                      className={`font-terminal rounded border px-3 py-2 text-sm font-bold uppercase ${
-                        isActive
-                          ? "border-emerald-400/60 bg-emerald-400/10 text-emerald-400"
-                          : "border-red-400/60 bg-red-500/10 text-red-400"
-                      }`}
-                    >
-                      {module.status}
-                    </span>
+
+                    <p className="font-terminal mt-6 text-xs font-bold uppercase tracking-widest text-slate-500">
+                      Domain {module.id}
+                    </p>
+                    <h3 className="font-display mt-2 text-xl sm:text-2xl font-black uppercase text-cyan-300 leading-tight">
+                      {module.title}
+                    </h3>
+                    <p className={`font-terminal mt-2 text-sm sm:text-base font-semibold ${typeColor}`}>{module.type}</p>
+                    <p className="mt-4 text-sm sm:text-base leading-relaxed text-slate-300">{module.copy}</p>
                   </div>
-                  <h3 className="font-display mt-8 text-2xl font-black uppercase text-cyan-300">{module.title}</h3>
-                  <p className="font-terminal mt-3 text-base text-purple-400">{module.type}</p>
-                  <p className="mt-5 max-w-sm text-lg leading-8 text-slate-400">{module.copy}</p>
-                  <div className="mt-7 h-px bg-cyan-300/25" />
+
+                  <div className="mt-6 pt-4 border-t border-cyan-400/20">
+                    <p className="font-terminal text-[10px] uppercase tracking-wider text-slate-400 mb-2 font-bold">
+                      Core Directives:
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {module.topics.map((topic) => (
+                        <span
+                          key={topic}
+                          className="rounded border border-cyan-400/25 bg-[#060c1d] px-2 py-0.5 text-[10px] sm:text-[11px] font-mono text-slate-300"
+                        >
+                          {topic}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </article>
               );
             })}
