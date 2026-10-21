@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { WinnerRevealOverlay } from "@/components/WinnerRevealOverlay";
 
 const STARS = Array.from({ length: 70 }, (_, i) => ({
   left: (i * 37) % 100,
@@ -11,7 +12,7 @@ const STARS = Array.from({ length: 70 }, (_, i) => ({
   delay: (i % 7) * 0.4,
 }));
 
-type BroadcastScreen = "none" | "starting_soon" | "game_starting_soon";
+type BroadcastScreen = "none" | "starting_soon" | "game_starting_soon" | "winner_reveal";
 
 export function SpaceTimerOverlay() {
   const pathname = usePathname();
@@ -65,6 +66,11 @@ export function SpaceTimerOverlay() {
 
   // Never block the admin dashboard
   if (pathname?.startsWith("/admin")) return null;
+
+  // Podium / Winner Reveal screen takes highest prominence
+  if (activeScreen === "winner_reveal") {
+    return <WinnerRevealOverlay />;
+  }
 
   // Nothing to show if neither timer nor broadcast screen is active
   if (endsAt === null && activeScreen === "none") return null;

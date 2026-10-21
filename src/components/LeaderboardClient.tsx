@@ -138,7 +138,12 @@ export function LeaderboardClient({ initialTeams = [] }: LeaderboardClientProps)
                   <Mascot size={54} strokeWidth={1.8} />
                   {actualRank === 1 ? <Trophy className="mt-3 text-amber-300" size={36} /> : <Medal className="mt-3" size={32} />}
                   <p className="font-terminal mt-3 text-xs font-bold uppercase tracking-widest">Rank #{actualRank}</p>
-                  <h2 className="font-display mt-2 max-w-[240px] text-2xl font-black text-white">{team.name}</h2>
+                  <h2
+                    className="font-display mt-2 w-full max-w-full truncate whitespace-nowrap text-lg sm:text-xl font-black text-white px-2"
+                    title={team.name}
+                  >
+                    {team.name}
+                  </h2>
                   <p className={`font-display mt-4 font-black ${isWinner ? "text-5xl text-amber-300" : "text-4xl text-slate-300"}`}>
                     {(team.total_score ?? 0).toLocaleString()}
                   </p>
@@ -183,10 +188,10 @@ export function LeaderboardClient({ initialTeams = [] }: LeaderboardClientProps)
                       <td className={`px-4 py-4 text-center font-display text-xl ${rankColor}`}>
                         #{rankNum}
                       </td>
-                      <td className="px-5 py-4 font-display text-lg font-bold text-white">
+                      <td className="px-5 py-4 font-display text-lg font-bold text-white whitespace-nowrap">
                         {team.name}
                         {team.members && team.members.length > 0 ? (
-                          <div className="font-terminal mt-0.5 text-[10px] font-normal uppercase text-slate-400">
+                          <div className="font-terminal mt-0.5 text-[10px] font-normal uppercase text-slate-400 whitespace-nowrap truncate max-w-xs">
                             {team.members.join(" • ")}
                           </div>
                         ) : null}

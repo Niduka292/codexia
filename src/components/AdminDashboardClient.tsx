@@ -33,7 +33,7 @@ export function AdminDashboardClient({
   const [registrations] = useState<RegistrationRecord[]>(initialRegistrations);
   const [leaderboard, setLeaderboard] = useState<LeaderboardTeam[]>(initialLeaderboard);
   const [loading, setLoading] = useState(false);
-  const [activeScreen, setActiveScreen] = useState<"none" | "starting_soon" | "game_starting_soon">("none");
+  const [activeScreen, setActiveScreen] = useState<"none" | "starting_soon" | "game_starting_soon" | "winner_reveal">("none");
   const [screenLoading, setScreenLoading] = useState(false);
 
   useEffect(() => {
@@ -46,6 +46,8 @@ export function AdminDashboardClient({
       .then((data) => {
         if (data.activeScreen) {
           setActiveScreen(data.activeScreen);
+        } else if (data.winnerReveal) {
+          setActiveScreen("winner_reveal");
         } else if (data.gameStartingSoon) {
           setActiveScreen("game_starting_soon");
         } else if (data.startingSoon) {
@@ -55,7 +57,7 @@ export function AdminDashboardClient({
       .catch(() => {});
   }, []);
 
-  async function setBroadcastScreen(screen: "starting_soon" | "game_starting_soon") {
+  async function setBroadcastScreen(screen: "starting_soon" | "game_starting_soon" | "winner_reveal") {
     setScreenLoading(true);
     const target = activeScreen === screen ? "none" : screen;
     try {
@@ -153,6 +155,29 @@ export function AdminDashboardClient({
                   )}
                 </button>
 
+                <button
+                  type="button"
+                  onClick={() => setBroadcastScreen("winner_reveal")}
+                  disabled={screenLoading}
+                  className={`codefest-button px-3.5 py-2.5 text-xs inline-flex items-center gap-1.5 ${
+                    activeScreen === "winner_reveal"
+                      ? "border-yellow-400/70 bg-yellow-400/25 text-yellow-200 shadow-[0_0_20px_rgba(251,191,36,0.4)]"
+                      : "ghost-button border-yellow-400/30 text-yellow-300/80 hover:text-yellow-200"
+                  }`}
+                >
+                  {activeScreen === "winner_reveal" ? (
+                    <>
+                      <EyeOff size={13} />
+                      Hide Winner Reveal
+                    </>
+                  ) : (
+                    <>
+                      <Trophy size={13} className="text-yellow-400" />
+                      Show Winner Reveal
+                    </>
+                  )}
+                </button>
+
                 <span className="font-terminal rounded border border-cyan-300/30 bg-cyan-300/10 px-3.5 py-2.5 text-xs font-bold text-cyan-300">
                   {registrations.length} Teams
                 </span>
@@ -176,10 +201,10 @@ export function AdminDashboardClient({
                   {registrations.length > 0 ? (
                     registrations.map((reg) => (
                       <tr key={reg.id} className="transition-all duration-300 hover:bg-cyan-300/[0.04]">
-                        <td className="px-5 py-4 font-mono text-xs text-slate-400">
+                        <td className="px-5 py-4 font-mono text-xs text-slate-400 whitespace-nowrap">
                           {new Date(reg.submitted_at).toLocaleString()}
                         </td>
-                        <td className="px-5 py-4 font-display text-base font-bold text-white">
+                        <td className="px-5 py-4 font-display text-base font-bold text-white whitespace-nowrap">
                           {reg.team_name}
                         </td>
                         <td className="px-5 py-4 font-medium text-slate-200">
@@ -296,6 +321,29 @@ export function AdminDashboardClient({
 
                 <button
                   type="button"
+                  onClick={() => setBroadcastScreen("winner_reveal")}
+                  disabled={screenLoading}
+                  className={`codefest-button px-3.5 py-3 text-xs inline-flex items-center gap-1.5 ${
+                    activeScreen === "winner_reveal"
+                      ? "border-yellow-400/70 bg-yellow-400/25 text-yellow-200 shadow-[0_0_20px_rgba(251,191,36,0.4)]"
+                      : "ghost-button border-yellow-400/30 text-yellow-300/80 hover:text-yellow-200"
+                  }`}
+                >
+                  {activeScreen === "winner_reveal" ? (
+                    <>
+                      <EyeOff size={13} />
+                      Hide Winner Reveal
+                    </>
+                  ) : (
+                    <>
+                      <Trophy size={13} className="text-yellow-400" />
+                      Show Winner Reveal
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
                   onClick={fetchLiveLeaderboard}
                   disabled={loading}
                   className="codefest-button ghost-button px-4 py-3 text-xs"
@@ -353,7 +401,7 @@ export function AdminDashboardClient({
                       <td className="px-4 py-4 font-display text-lg font-bold text-cyan-300">
                         #{index + 1}
                       </td>
-                      <td className="px-4 py-4 font-display text-base font-bold text-white">
+                      <td className="px-4 py-4 font-display text-base font-bold text-white whitespace-nowrap">
                         {team.name}
                       </td>
                       <td className="px-3 py-4 text-center font-mono text-sm font-bold text-cyan-300">

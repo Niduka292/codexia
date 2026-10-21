@@ -1,33 +1,66 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { EyeOff, Play, Radio, Rocket, Sparkles, Square, Timer } from "lucide-react";
+import {
+  Crown,
+  EyeOff,
+  Lock,
+  PartyPopper,
+  Play,
+  Radio,
+  Rocket,
+  Sparkles,
+  Square,
+  Timer,
+  Trophy,
+} from "lucide-react";
 
 const MAX_MINUTES = 30;
 
-type BroadcastScreen = "none" | "starting_soon" | "game_starting_soon";
+type BroadcastScreen = "none" | "starting_soon" | "game_starting_soon" | "winner_reveal";
+
+type RevealState = {
+  rank3: boolean;
+  rank2: boolean;
+  rank1: boolean;
+  confettiTrigger: number;
+};
 
 export function AdminTimerControl() {
   const [minutes, setMinutes] = useState(5);
   const [endsAt, setEndsAt] = useState<number | null>(null);
   const [activeScreen, setActiveScreen] = useState<BroadcastScreen>("none");
+  const [revealState, setRevealState] = useState<RevealState>({
+    rank3: false,
+    rank2: false,
+    rank1: false,
+    confettiTrigger: 0,
+  });
   const [offset, setOffset] = useState(0);
   const [remaining, setRemaining] = useState(0);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [screenBusy, setScreenBusy] = useState(false);
+  const [revealBusy, setRevealBusy] = useState(false);
 
   function apply(data: {
     endsAt: number | null;
     activeScreen?: BroadcastScreen;
     startingSoon?: boolean;
     gameStartingSoon?: boolean;
+    winnerReveal?: boolean;
+    revealState?: RevealState;
     now: number;
   }) {
     setOffset(data.now - Date.now());
     setEndsAt(data.endsAt);
+    if (data.revealState) {
+      setRevealState(data.revealState);
+    }
     if (data.activeScreen) {
       setActiveScreen(data.activeScreen);
+    } else if (data.winnerReveal) {
+      setActiveScreen("winner_reveal");
     } else if (data.gameStartingSoon) {
       setActiveScreen("game_starting_soon");
     } else if (data.startingSoon) {
@@ -79,6 +112,30 @@ export function AdminTimerControl() {
       setError("Failed to update broadcast screen.");
     } finally {
       setScreenBusy(false);
+    }
+  }
+
+  async function controlReveal(action: 1 | 2 | 3 | "all" | "reset" | "confetti") {
+    setError("");
+    setRevealBusy(true);
+    try {
+      const payload =
+        action === "confetti" ? { triggerConfetti: true } : { revealRank: action };
+      const res = await fetch("/api/timer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Failed to execute reveal command.");
+      } else {
+        apply(data);
+      }
+    } catch {
+      setError("Failed to execute reveal command.");
+    } finally {
+      setRevealBusy(false);
     }
   }
 
@@ -137,7 +194,12 @@ export function AdminTimerControl() {
 
         {/* Global indicator */}
         <div className="flex items-center gap-2">
-          {activeScreen === "starting_soon" ? (
+          {activeScreen === "winner_reveal" ? (
+            <span className="font-terminal inline-flex items-center gap-1.5 rounded-full border border-yellow-400/60 bg-yellow-400/20 px-3 py-1 text-xs font-black text-yellow-300 animate-pulse shadow-[0_0_15px_rgba(251,191,36,0.4)]">
+              <span className="h-2 w-2 rounded-full bg-yellow-400" />
+              Users Seeing: "Podium / Winner Reveal" 🏆
+            </span>
+          ) : activeScreen === "starting_soon" ? (
             <span className="font-terminal inline-flex items-center gap-1.5 rounded-full border border-cyan-400/50 bg-cyan-400/15 px-3 py-1 text-xs font-bold text-cyan-300 animate-pulse">
               <span className="h-2 w-2 rounded-full bg-cyan-400" />
               Users Seeing: "Starting Soon"
@@ -156,8 +218,8 @@ export function AdminTimerControl() {
         </div>
       </div>
 
-      {/* Grid of 3 Broadcast Controls */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      {/* Grid of 4 Broadcast Controls */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {/* Card 1: "Starting Soon" Page */}
         <div
           className={`rounded-lg border p-4 flex flex-col justify-between gap-4 transition-all ${
@@ -266,6 +328,60 @@ export function AdminTimerControl() {
           </div>
         </div>
 
+        {/* Card 3: Podium / Winner Reveal Page */}
+        <div
+          className={`rounded-lg border p-4 flex flex-col justify-between gap-4 transition-all ${
+            activeScreen === "winner_reveal"
+              ? "border-yellow-400/70 bg-yellow-950/40 shadow-[0_0_25px_rgba(251,191,36,0.3)] ring-1 ring-yellow-400/40"
+              : "border-cyan-400/20 bg-[#040814]/70"
+          }`}
+        >
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="font-terminal text-xs font-bold uppercase tracking-wider text-yellow-300 flex items-center gap-1.5">
+                <Trophy size={14} />
+                Podium & Winner Reveal
+              </span>
+              <span
+                className={`font-terminal rounded px-2 py-0.5 text-[10px] font-black uppercase ${
+                  activeScreen === "winner_reveal"
+                    ? "border border-yellow-400/60 bg-yellow-400/20 text-yellow-300"
+                    : "border border-slate-700 bg-slate-800 text-slate-400"
+                }`}
+              >
+                {activeScreen === "winner_reveal" ? "ACTIVE" : "STANDBY"}
+              </span>
+            </div>
+            <p className="mt-2 text-xs text-slate-300 leading-relaxed">
+              Broadcasts the <strong>Podium & Winner Reveal</strong> ceremony screen. Pulls live ranks & scores from the leaderboard.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            {activeScreen === "winner_reveal" ? (
+              <button
+                type="button"
+                onClick={() => setScreen("winner_reveal")}
+                disabled={screenBusy}
+                className="codefest-button ghost-button w-full border-red-500/50 bg-red-500/10 text-red-300 hover:bg-red-500/20 py-2.5 text-xs inline-flex items-center justify-center gap-2"
+              >
+                <EyeOff size={14} />
+                <span>Hide Winner Reveal</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setScreen("winner_reveal")}
+                disabled={screenBusy}
+                className="codefest-button signal-button w-full py-2.5 text-xs inline-flex items-center justify-center gap-2 border-yellow-400/60 bg-yellow-400/20 text-yellow-200 hover:bg-yellow-400/30"
+              >
+                <Trophy size={14} />
+                <span>Show Winner Reveal</span>
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Card 3: Mission Countdown Timer */}
         <div className="rounded-lg border border-cyan-400/20 bg-[#040814]/70 p-4 flex flex-col justify-between gap-4">
           <div>
@@ -331,6 +447,170 @@ export function AdminTimerControl() {
           </div>
         </div>
       </div>
+
+      {/* When Winner Reveal is active, show the Dedicated Stage MC Console */}
+      {activeScreen === "winner_reveal" && (
+        <div className="rounded-xl border-2 border-yellow-400/60 bg-gradient-to-br from-yellow-950/40 via-[#0c0a02]/95 to-black p-5 space-y-4 shadow-[0_0_35px_rgba(251,191,36,0.25)] ring-1 ring-yellow-400/30">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-yellow-400/25 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-yellow-400/50 bg-yellow-400/20 text-yellow-300">
+                <Trophy size={18} />
+              </div>
+              <div>
+                <h4 className="font-display text-sm font-black uppercase tracking-wider text-yellow-200">
+                  Master Stage Reveal Console (Admin Control)
+                </h4>
+                <p className="text-[11px] text-slate-300 font-mono">
+                  You control when each podium place is unveiled across all visitors&apos; screens.
+                </p>
+              </div>
+            </div>
+            <div className="font-terminal text-xs text-yellow-300 flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-yellow-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-yellow-400" />
+              </span>
+              <span>Live Stage Uplink Active</span>
+            </div>
+          </div>
+
+          {/* Current Live Stage Status Cards */}
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            {/* 3rd Place Status */}
+            <div
+              className={`rounded-lg border p-3 text-center transition-all ${
+                revealState.rank3
+                  ? "border-amber-600/70 bg-amber-950/40 shadow-[0_0_15px_rgba(217,119,6,0.3)]"
+                  : "border-slate-800 bg-slate-900/60 opacity-60"
+              }`}
+            >
+              <div className="flex items-center justify-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-amber-400 font-bold">
+                <span>🥉 3rd Place</span>
+              </div>
+              <p
+                className={`font-terminal mt-1 text-xs font-black ${
+                  revealState.rank3 ? "text-amber-300" : "text-slate-400"
+                }`}
+              >
+                {revealState.rank3 ? "✓ REVEALED ON SCREEN" : "🔒 ENCRYPTED / HIDDEN"}
+              </p>
+            </div>
+
+            {/* 2nd Place Status */}
+            <div
+              className={`rounded-lg border p-3 text-center transition-all ${
+                revealState.rank2
+                  ? "border-slate-300/70 bg-slate-800/60 shadow-[0_0_15px_rgba(255,255,255,0.25)]"
+                  : "border-slate-800 bg-slate-900/60 opacity-60"
+              }`}
+            >
+              <div className="flex items-center justify-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-slate-300 font-bold">
+                <span>🥈 2nd Place</span>
+              </div>
+              <p
+                className={`font-terminal mt-1 text-xs font-black ${
+                  revealState.rank2 ? "text-slate-100" : "text-slate-400"
+                }`}
+              >
+                {revealState.rank2 ? "✓ REVEALED ON SCREEN" : "🔒 ENCRYPTED / HIDDEN"}
+              </p>
+            </div>
+
+            {/* 1st Place Status */}
+            <div
+              className={`rounded-lg border-2 p-3 text-center transition-all ${
+                revealState.rank1
+                  ? "border-yellow-400 bg-yellow-950/50 shadow-[0_0_25px_rgba(251,191,36,0.4)] ring-1 ring-yellow-400/50"
+                  : "border-slate-800 bg-slate-900/60 opacity-60"
+              }`}
+            >
+              <div className="flex items-center justify-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-yellow-300 font-bold">
+                <span>👑 Grand Champion</span>
+              </div>
+              <p
+                className={`font-terminal mt-1 text-xs font-black ${
+                  revealState.rank1 ? "text-yellow-200" : "text-slate-400"
+                }`}
+              >
+                {revealState.rank1 ? "👑 REVEALED (CELEBRATING!)" : "🔒 ENCRYPTED / HIDDEN"}
+              </p>
+            </div>
+          </div>
+
+          {/* Action Buttons to Trigger Reveal */}
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-yellow-400/15">
+            <button
+              type="button"
+              onClick={() => controlReveal(3)}
+              disabled={revealBusy || revealState.rank3}
+              className={`font-terminal px-3.5 py-2 text-xs font-bold rounded-lg border transition-all inline-flex items-center gap-1.5 ${
+                revealState.rank3
+                  ? "border-slate-800 bg-slate-900/40 text-slate-500 cursor-not-allowed"
+                  : "border-amber-600/70 bg-amber-900/50 text-amber-200 hover:bg-amber-800 shadow-[0_0_15px_rgba(217,119,6,0.3)]"
+              }`}
+            >
+              <span>🥉 Reveal 3rd Place</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => controlReveal(2)}
+              disabled={revealBusy || revealState.rank2}
+              className={`font-terminal px-3.5 py-2 text-xs font-bold rounded-lg border transition-all inline-flex items-center gap-1.5 ${
+                revealState.rank2
+                  ? "border-slate-800 bg-slate-900/40 text-slate-500 cursor-not-allowed"
+                  : "border-slate-400/70 bg-slate-800/80 text-slate-100 hover:bg-slate-700 shadow-[0_0_15px_rgba(255,255,255,0.25)]"
+              }`}
+            >
+              <span>🥈 Reveal 2nd Place</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => controlReveal(1)}
+              disabled={revealBusy || revealState.rank1}
+              className={`font-terminal px-4 py-2 text-xs font-black rounded-lg border-2 transition-all inline-flex items-center gap-1.5 ${
+                revealState.rank1
+                  ? "border-slate-800 bg-slate-900/40 text-slate-500 cursor-not-allowed"
+                  : "border-yellow-400 bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-500 text-black hover:brightness-110 shadow-[0_0_25px_rgba(251,191,36,0.7)] animate-pulse"
+              }`}
+            >
+              <Crown size={14} />
+              <span>👑 Reveal Grand Champion!</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => controlReveal("all")}
+              disabled={revealBusy}
+              className="font-terminal px-3 py-2 text-xs font-bold rounded-lg border border-cyan-400/50 bg-cyan-950/40 text-cyan-200 hover:bg-cyan-900/60 transition-all inline-flex items-center gap-1.5"
+            >
+              <Sparkles size={13} />
+              <span>Reveal All</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => controlReveal("reset")}
+              disabled={revealBusy}
+              className="font-terminal px-3 py-2 text-xs font-bold rounded-lg border border-red-500/40 bg-red-950/30 text-red-300 hover:bg-red-900/50 transition-all inline-flex items-center gap-1.5"
+            >
+              <Lock size={13} />
+              <span>Lock / Reset All</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => controlReveal("confetti")}
+              disabled={revealBusy}
+              className="font-terminal px-3 py-2 text-xs font-bold rounded-lg border border-amber-400/60 bg-amber-400/20 text-amber-200 hover:bg-amber-400/30 transition-all inline-flex items-center gap-1.5 ml-auto"
+            >
+              <PartyPopper size={13} />
+              <span>Fire Confetti Cannon</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {error ? <p className="text-xs text-red-400 font-mono">{error}</p> : null}
     </div>
