@@ -2,14 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, Satellite, ScrollText, UserPlus, X } from "lucide-react";
+import { Menu, Satellite, ScrollText, Trophy, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 const navLinks = [
   { href: "/", label: "Mission", icon: Satellite, match: "/" },
   { href: "/rules", label: "Rules", icon: ScrollText, match: "/rules" },
-  { href: "/register", label: "Register", icon: UserPlus, match: "/register" },
+  { href: "/leaderboard", label: "Leaderboard", icon: Trophy, match: "/leaderboard" },
 ];
 
 export function Navbar() {

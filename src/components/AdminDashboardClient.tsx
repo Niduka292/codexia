@@ -29,7 +29,7 @@ export function AdminDashboardClient({
   async function fetchLiveLeaderboard() {
     setLoading(true);
     try {
-      const res = await fetch("/api/leaderboard", { cache: "no-store" });
+      const res = await fetch(`/api/leaderboard?t=${Date.now()}`, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         if (data.teams) {
@@ -192,46 +192,48 @@ export function AdminDashboardClient({
 
             {/* Leaderboard Matrix Table */}
             <div className="glass-panel mt-6 overflow-x-auto">
-              <table className="relative z-10 w-full min-w-[800px] text-left">
+              <table className="relative z-10 w-full min-w-[900px] text-left">
                 <thead className="font-terminal border-b border-cyan-300/15 text-xs font-black uppercase tracking-widest text-slate-400">
                   <tr>
-                    <th className="px-5 py-4">Rank</th>
-                    <th className="px-5 py-4">Team Name</th>
-                    <th className="px-5 py-4 text-cyan-300">
-                      <span className="inline-flex items-center gap-1.5"><GitFork size={14} /> DSA Points</span>
-                    </th>
-                    <th className="px-5 py-4 text-purple-300">
-                      <span className="inline-flex items-center gap-1.5"><LockKeyhole size={14} /> Security Points</span>
-                    </th>
-                    <th className="px-5 py-4 text-amber-300">
-                      <span className="inline-flex items-center gap-1.5"><Cpu size={14} /> Systems Points</span>
-                    </th>
-                    <th className="px-5 py-4 text-right">Total XP</th>
-                    <th className="px-5 py-4">Latest Solve</th>
+                    <th className="px-4 py-4">Rank</th>
+                    <th className="px-4 py-4">Team Name</th>
+                    <th className="px-3 py-4 text-center text-cyan-300">Game 01</th>
+                    <th className="px-3 py-4 text-center text-purple-300">Game 02</th>
+                    <th className="px-3 py-4 text-center text-amber-300">Game 03</th>
+                    <th className="px-3 py-4 text-center text-emerald-300">Game 04</th>
+                    <th className="px-3 py-4 text-center text-sky-300">Game 05</th>
+                    <th className="px-4 py-4 text-right">Total XP</th>
+                    <th className="px-4 py-4">Latest Solve</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-cyan-300/10">
                   {leaderboard.map((team, index) => (
                     <tr key={team.id} className="transition-all duration-300 hover:bg-cyan-300/[0.04]">
-                      <td className="px-5 py-4 font-display text-lg font-bold text-cyan-300">
+                      <td className="px-4 py-4 font-display text-lg font-bold text-cyan-300">
                         #{index + 1}
                       </td>
-                      <td className="px-5 py-4 font-display text-base font-bold text-white">
+                      <td className="px-4 py-4 font-display text-base font-bold text-white">
                         {team.name}
                       </td>
-                      <td className="px-5 py-4 font-mono text-sm font-bold text-cyan-300">
-                        {team.dsa_points}
+                      <td className="px-3 py-4 text-center font-mono text-sm font-bold text-cyan-300">
+                        {team.game1_points ?? team.dsa_points ?? 0}
                       </td>
-                      <td className="px-5 py-4 font-mono text-sm font-bold text-purple-300">
-                        {team.security_points}
+                      <td className="px-3 py-4 text-center font-mono text-sm font-bold text-purple-300">
+                        {team.game2_points ?? team.security_points ?? 0}
                       </td>
-                      <td className="px-5 py-4 font-mono text-sm font-bold text-amber-300">
-                        {team.systems_points}
+                      <td className="px-3 py-4 text-center font-mono text-sm font-bold text-amber-300">
+                        {team.game3_points ?? team.systems_points ?? 0}
                       </td>
-                      <td className="px-5 py-4 text-right font-display text-2xl font-black text-white">
+                      <td className="px-3 py-4 text-center font-mono text-sm font-bold text-emerald-300">
+                        {team.game4_points ?? 0}
+                      </td>
+                      <td className="px-3 py-4 text-center font-mono text-sm font-bold text-sky-300">
+                        {team.game5_points ?? 0}
+                      </td>
+                      <td className="px-4 py-4 text-right font-display text-2xl font-black text-white">
                         {team.total_score.toLocaleString()}
                       </td>
-                      <td className="px-5 py-4 font-mono text-xs uppercase text-slate-400">
+                      <td className="px-4 py-4 font-mono text-xs uppercase text-slate-400">
                         {team.latest_solve}
                       </td>
                     </tr>
@@ -247,7 +249,7 @@ export function AdminDashboardClient({
                 Judges can update scores using a dedicated <strong>"Leaderboard"</strong> sheet/tab with these columns:
               </p>
               <div className="hud-frame mt-4 overflow-x-auto p-4 font-mono text-xs text-cyan-300">
-                Team Name | Data Structures Points | Security Points | Systems Points | Latest Solve
+                Team Name | Game 01 | Game 02 | Game 03 | Game 04 | Game 05 | Latest Solve
               </div>
               <p className="mt-3 text-xs text-slate-400">
                 Set <code className="text-purple-300">GOOGLE_SHEETS_LEADERBOARD_URL</code> in <code className="text-cyan-300">.env.local</code> to fetch live scores directly from the spreadsheet!

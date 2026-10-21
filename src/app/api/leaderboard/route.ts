@@ -11,11 +11,20 @@ export async function GET() {
   try {
     const { teams, source } = await fetchLiveLeaderboard();
 
-    return NextResponse.json({
-      success: true,
-      source,
-      teams,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        source,
+        teams,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      }
+    );
   } catch (error) {
     console.error("Leaderboard GET error:", error);
     return NextResponse.json(

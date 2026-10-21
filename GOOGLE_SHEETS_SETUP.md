@@ -11,7 +11,7 @@ Open [Google Sheets](https://sheets.new) and create two tabs at the bottom:
    - Headers (Row 1): `Timestamp` | `Team Name` | `Leader Name` | `Leader Email` | `Leader Student ID` | `Academic Year` | `Programming Languages` | `Team Members`
 
 2. **Tab 2 Name**: `Leaderboard` (Used by Judges for marking)
-   - Headers (Row 1): `Team Name` | `Data Structures Points` | `Security Points` | `Systems Points` | `Latest Solve`
+   - Headers (Row 1): `Team Name` | `Game 01` | `Game 02` | `Game 03` | `Game 04` | `Game 05` | `Latest Solve`
 
 ---
 
@@ -122,17 +122,21 @@ function doGet(e) {
       if (!row[0] || String(row[0]).trim() === "") continue;
 
       var teamName = String(row[0]);
-      var dsa = Number(row[1]) || 0;
-      var sec = Number(row[2]) || 0;
-      var sys = Number(row[3]) || 0;
-      var latestSolve = String(row[4] || "PROTOCOL ACTIVE");
+      var g1 = Number(row[1]) || 0;
+      var g2 = Number(row[2]) || 0;
+      var g3 = Number(row[3]) || 0;
+      var g4 = Number(row[4]) || 0;
+      var g5 = Number(row[5]) || 0;
+      var latestSolve = String(row[6] || "PROTOCOL ACTIVE");
 
       result.push({
         name: teamName,
-        dsa_points: dsa,
-        security_points: sec,
-        systems_points: sys,
-        total_score: dsa + sec + sys,
+        game1_points: g1,
+        game2_points: g2,
+        game3_points: g3,
+        game4_points: g4,
+        game5_points: g5,
+        total_score: g1 + g2 + g3 + g4 + g5,
         latest_solve: latestSolve
       });
     }

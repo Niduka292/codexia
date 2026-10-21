@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarDays, Clock3, LockKeyhole, MapPin, Phone, Radio, Satellite, ScrollText, UserPlus, Zap } from "lucide-react";
+import { CalendarDays, Clock3, LockKeyhole, MapPin, Phone, Radio, Satellite, ScrollText, Trophy, UserPlus, Zap } from "lucide-react";
 import { CODEXIA_EVENT } from "@/lib/event";
 
 function WhatsAppIcon({ className = "h-3.5 w-3.5" }: { className?: string }) {
@@ -162,33 +162,23 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/register"
+                  href="/leaderboard"
                   className="inline-flex items-center gap-2 text-slate-400 hover:text-cyan-300 transition-colors"
                 >
-                  <UserPlus size={14} className="text-cyan-400" />
-                  <span>Team Registration</span>
+                  <Trophy size={14} className="text-cyan-400" />
+                  <span>Leaderboard</span>
                 </Link>
               </li>
             </ul>
 
             <div className="pt-2">
-              {CODEXIA_EVENT.registrationsOpen ? (
-                <Link
-                  href="/register"
-                  className="codefest-button signal-button w-full py-2.5 text-xs font-terminal inline-flex items-center justify-center gap-2"
-                >
-                  <span>Register Team</span>
-                  <Zap size={13} />
-                </Link>
-              ) : (
-                <Link
-                  href="/register"
-                  className="codefest-button ghost-button w-full py-2.5 text-xs font-terminal inline-flex items-center justify-center gap-2 border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20"
-                >
-                  <LockKeyhole size={13} />
-                  <span>Registrations Closed</span>
-                </Link>
-              )}
+              <Link
+                href="/leaderboard"
+                className="codefest-button signal-button w-full py-2.5 text-xs font-terminal inline-flex items-center justify-center gap-2"
+              >
+                <span>View Leaderboard</span>
+                <Trophy size={13} />
+              </Link>
             </div>
           </div>
         </div>

@@ -16,7 +16,7 @@ export function LeaderboardClient({ initialTeams = [] }: LeaderboardClientProps)
   async function fetchLeaderboard() {
     setLoading(true);
     try {
-      const res = await fetch("/api/leaderboard", { cache: "no-store" });
+      const res = await fetch(`/api/leaderboard?t=${Date.now()}`, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         if (data.teams) {
@@ -99,8 +99,8 @@ export function LeaderboardClient({ initialTeams = [] }: LeaderboardClientProps)
               <GitFork size={24} />
             </div>
             <div>
-              <p className="font-terminal text-xs font-bold uppercase tracking-widest text-slate-400">Domains Evaluated</p>
-              <p className="font-display mt-1 text-3xl font-black text-purple-300">Covers Core Areas</p>
+              <p className="font-terminal text-xs font-bold uppercase tracking-widest text-slate-400">Games Evaluated</p>
+              <p className="font-display mt-1 text-3xl font-black text-purple-300">5 Challenge Games</p>
             </div>
           </div>
           <div className="glass-panel flex items-center gap-5 p-6">
@@ -151,21 +151,17 @@ export function LeaderboardClient({ initialTeams = [] }: LeaderboardClientProps)
 
         {/* Standings Table with Domain Breakdown */}
         <div className="mt-12 overflow-x-auto">
-          <div className="glass-panel min-w-[900px]">
+          <div className="glass-panel min-w-[980px]">
             <table className="relative z-10 w-full text-left">
               <thead className="font-terminal border-b border-cyan-300/15 text-xs font-black uppercase tracking-widest text-slate-400">
                 <tr>
-                  <th className="px-5 py-4 text-center">Rank</th>
+                  <th className="px-4 py-4 text-center">Rank</th>
                   <th className="px-5 py-4">Team Name</th>
-                  <th className="px-5 py-4 text-cyan-300">
-                    <span className="inline-flex items-center gap-1.5"><GitFork size={14} /> DSA</span>
-                  </th>
-                  <th className="px-5 py-4 text-purple-300">
-                    <span className="inline-flex items-center gap-1.5"><LockKeyhole size={14} /> Security</span>
-                  </th>
-                  <th className="px-5 py-4 text-amber-300">
-                    <span className="inline-flex items-center gap-1.5"><Cpu size={14} /> Systems</span>
-                  </th>
+                  <th className="px-3 py-4 text-center text-cyan-300">Game 01</th>
+                  <th className="px-3 py-4 text-center text-purple-300">Game 02</th>
+                  <th className="px-3 py-4 text-center text-amber-300">Game 03</th>
+                  <th className="px-3 py-4 text-center text-emerald-300">Game 04</th>
+                  <th className="px-3 py-4 text-center text-sky-300">Game 05</th>
                   <th className="px-5 py-4 text-right">Total XP</th>
                   <th className="px-5 py-4">Latest Solve</th>
                 </tr>
@@ -184,7 +180,7 @@ export function LeaderboardClient({ initialTeams = [] }: LeaderboardClientProps)
 
                   return (
                     <tr key={team.id} className="transition-all duration-300 hover:bg-cyan-300/[0.04]">
-                      <td className={`px-5 py-4 text-center font-display text-xl ${rankColor}`}>
+                      <td className={`px-4 py-4 text-center font-display text-xl ${rankColor}`}>
                         #{rankNum}
                       </td>
                       <td className="px-5 py-4 font-display text-lg font-bold text-white">
@@ -195,14 +191,20 @@ export function LeaderboardClient({ initialTeams = [] }: LeaderboardClientProps)
                           </div>
                         ) : null}
                       </td>
-                      <td className="px-5 py-4 font-mono text-sm font-bold text-cyan-300">
-                        {team.dsa_points}
+                      <td className="px-3 py-4 text-center font-mono text-sm font-bold text-cyan-300">
+                        {team.game1_points ?? team.dsa_points ?? 0}
                       </td>
-                      <td className="px-5 py-4 font-mono text-sm font-bold text-purple-300">
-                        {team.security_points}
+                      <td className="px-3 py-4 text-center font-mono text-sm font-bold text-purple-300">
+                        {team.game2_points ?? team.security_points ?? 0}
                       </td>
-                      <td className="px-5 py-4 font-mono text-sm font-bold text-amber-300">
-                        {team.systems_points}
+                      <td className="px-3 py-4 text-center font-mono text-sm font-bold text-amber-300">
+                        {team.game3_points ?? team.systems_points ?? 0}
+                      </td>
+                      <td className="px-3 py-4 text-center font-mono text-sm font-bold text-emerald-300">
+                        {team.game4_points ?? 0}
+                      </td>
+                      <td className="px-3 py-4 text-center font-mono text-sm font-bold text-sky-300">
+                        {team.game5_points ?? 0}
                       </td>
                       <td className="px-5 py-4 text-right font-display text-2xl font-black text-white">
                         {team.total_score.toLocaleString()}
