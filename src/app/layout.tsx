@@ -3,6 +3,7 @@ import { Inter, Orbitron, Space_Grotesk } from "next/font/google";
 import { BlinkingDots } from "@/components/BlinkingDots";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
+import { SpaceTimerOverlay } from "@/components/SpaceTimerOverlay";
 import "./globals.css";
 
 const inter = Inter({
@@ -51,6 +52,7 @@ export default function RootLayout({
       <body className="mission-shell relative min-h-full bg-void text-white">
         <BlinkingDots />
         <Navbar />
+        <SpaceTimerOverlay />
         <main className="relative z-10 min-h-screen">{children}</main>
         <Footer />
       </body>

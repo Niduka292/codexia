@@ -2,7 +2,19 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Cpu, ExternalLink, FileSpreadsheet, GitFork, LockKeyhole, RefreshCw, Trophy, Users } from "lucide-react";
+import {
+  Cpu,
+  ExternalLink,
+  EyeOff,
+  FileSpreadsheet,
+  GitFork,
+  LockKeyhole,
+  RefreshCw,
+  Rocket,
+  Sparkles,
+  Trophy,
+  Users,
+} from "lucide-react";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { AdminTimerControl } from "@/components/AdminTimerControl";
 import type { RegistrationRecord } from "@/lib/registrations";
@@ -21,10 +33,47 @@ export function AdminDashboardClient({
   const [registrations] = useState<RegistrationRecord[]>(initialRegistrations);
   const [leaderboard, setLeaderboard] = useState<LeaderboardTeam[]>(initialLeaderboard);
   const [loading, setLoading] = useState(false);
+  const [activeScreen, setActiveScreen] = useState<"none" | "starting_soon" | "game_starting_soon">("none");
+  const [screenLoading, setScreenLoading] = useState(false);
 
   useEffect(() => {
     setLeaderboard(initialLeaderboard);
   }, [initialLeaderboard]);
+
+  useEffect(() => {
+    fetch("/api/timer", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.activeScreen) {
+          setActiveScreen(data.activeScreen);
+        } else if (data.gameStartingSoon) {
+          setActiveScreen("game_starting_soon");
+        } else if (data.startingSoon) {
+          setActiveScreen("starting_soon");
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  async function setBroadcastScreen(screen: "starting_soon" | "game_starting_soon") {
+    setScreenLoading(true);
+    const target = activeScreen === screen ? "none" : screen;
+    try {
+      const res = await fetch("/api/timer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ activeScreen: target }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setActiveScreen(data.activeScreen || "none");
+      }
+    } catch (err) {
+      console.error("Failed to toggle broadcast screen:", err);
+    } finally {
+      setScreenLoading(false);
+    }
+  }
 
   async function fetchLiveLeaderboard() {
     setLoading(true);
@@ -57,9 +106,55 @@ export function AdminDashboardClient({
                 <p className="section-kicker">Command Center</p>
                 <h1 className="mission-title mt-2 text-4xl text-white sm:text-5xl">Teams Data</h1>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="font-terminal rounded border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-xs font-bold text-cyan-300">
-                  {registrations.length} Teams Registered
+              <div className="flex flex-wrap items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setBroadcastScreen("starting_soon")}
+                  disabled={screenLoading}
+                  className={`codefest-button px-3.5 py-2.5 text-xs inline-flex items-center gap-1.5 ${
+                    activeScreen === "starting_soon"
+                      ? "border-cyan-400/60 bg-cyan-400/20 text-cyan-200 shadow-[0_0_15px_rgba(0,229,255,0.3)]"
+                      : "ghost-button"
+                  }`}
+                >
+                  {activeScreen === "starting_soon" ? (
+                    <>
+                      <EyeOff size={13} />
+                      Hide "Starting Soon"
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={13} className="text-cyan-300" />
+                      Show "Starting Soon"
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBroadcastScreen("game_starting_soon")}
+                  disabled={screenLoading}
+                  className={`codefest-button px-3.5 py-2.5 text-xs inline-flex items-center gap-1.5 ${
+                    activeScreen === "game_starting_soon"
+                      ? "border-amber-400/60 bg-amber-400/20 text-amber-200 shadow-[0_0_15px_rgba(251,191,36,0.3)]"
+                      : "ghost-button"
+                  }`}
+                >
+                  {activeScreen === "game_starting_soon" ? (
+                    <>
+                      <EyeOff size={13} />
+                      Hide "Game Starting Soon"
+                    </>
+                  ) : (
+                    <>
+                      <Rocket size={13} className="text-amber-300" />
+                      Show "Game Starting Soon"
+                    </>
+                  )}
+                </button>
+
+                <span className="font-terminal rounded border border-cyan-300/30 bg-cyan-300/10 px-3.5 py-2.5 text-xs font-bold text-cyan-300">
+                  {registrations.length} Teams
                 </span>
               </div>
             </div>
@@ -152,7 +247,53 @@ export function AdminDashboardClient({
                 <p className="section-kicker">Judge Scoring Matrix</p>
                 <h1 className="mission-title mt-2 text-4xl text-white sm:text-5xl">Leaderboard Tab</h1>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setBroadcastScreen("starting_soon")}
+                  disabled={screenLoading}
+                  className={`codefest-button px-3.5 py-3 text-xs inline-flex items-center gap-1.5 ${
+                    activeScreen === "starting_soon"
+                      ? "border-cyan-400/60 bg-cyan-400/20 text-cyan-200 shadow-[0_0_15px_rgba(0,229,255,0.3)]"
+                      : "ghost-button"
+                  }`}
+                >
+                  {activeScreen === "starting_soon" ? (
+                    <>
+                      <EyeOff size={13} />
+                      Hide "Starting Soon"
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={13} className="text-cyan-300" />
+                      Show "Starting Soon"
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBroadcastScreen("game_starting_soon")}
+                  disabled={screenLoading}
+                  className={`codefest-button px-3.5 py-3 text-xs inline-flex items-center gap-1.5 ${
+                    activeScreen === "game_starting_soon"
+                      ? "border-amber-400/60 bg-amber-400/20 text-amber-200 shadow-[0_0_15px_rgba(251,191,36,0.3)]"
+                      : "ghost-button"
+                  }`}
+                >
+                  {activeScreen === "game_starting_soon" ? (
+                    <>
+                      <EyeOff size={13} />
+                      Hide "Game Starting Soon"
+                    </>
+                  ) : (
+                    <>
+                      <Rocket size={13} className="text-amber-300" />
+                      Show "Game Starting Soon"
+                    </>
+                  )}
+                </button>
+
                 <button
                   type="button"
                   onClick={fetchLiveLeaderboard}
