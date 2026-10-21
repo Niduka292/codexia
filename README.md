@@ -1,4 +1,5 @@
 # CODEXIA 2026
+Level Up Your Logic
 
 CODEXIA is a themed computer-science competition website built around a deep-space transmission narrative. It presents the event, counts down to launch, accepts team registrations, and provides an admin dashboard for organizers.
 
