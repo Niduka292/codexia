@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
+  BarChart3,
   Crown,
   EyeOff,
   Film,
@@ -24,7 +25,8 @@ type BroadcastScreen =
   | "game_starting_soon"
   | "winner_reveal"
   | "defusal_video"
-  | "intro_video";
+  | "intro_video"
+  | "leaderboard_presentation";
 
 type RevealState = {
   rank3: boolean;
@@ -58,6 +60,7 @@ export function AdminTimerControl() {
     winnerReveal?: boolean;
     defusalVideo?: boolean;
     introVideo?: boolean;
+    leaderboardPresentation?: boolean;
     revealState?: RevealState;
     now: number;
   }) {
@@ -68,6 +71,8 @@ export function AdminTimerControl() {
     }
     if (data.activeScreen) {
       setActiveScreen(data.activeScreen);
+    } else if (data.leaderboardPresentation) {
+      setActiveScreen("leaderboard_presentation");
     } else if (data.introVideo) {
       setActiveScreen("intro_video");
     } else if (data.defusalVideo) {
@@ -207,7 +212,12 @@ export function AdminTimerControl() {
 
         {/* Global indicator */}
         <div className="flex items-center gap-2">
-          {activeScreen === "intro_video" ? (
+          {activeScreen === "leaderboard_presentation" ? (
+            <span className="font-terminal inline-flex items-center gap-1.5 rounded-full border border-purple-400/60 bg-purple-400/20 px-3 py-1 text-xs font-black text-purple-300 animate-pulse shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+              <span className="h-2 w-2 rounded-full bg-purple-400" />
+              Users Seeing: "Live Leaderboard" 📊
+            </span>
+          ) : activeScreen === "intro_video" ? (
             <span className="font-terminal inline-flex items-center gap-1.5 rounded-full border border-cyan-400/60 bg-cyan-400/20 px-3 py-1 text-xs font-black text-cyan-300 animate-pulse shadow-[0_0_15px_rgba(0,229,255,0.4)]">
               <span className="h-2 w-2 rounded-full bg-cyan-400" />
               Users Seeing: "Intro Video" 🎬
@@ -242,7 +252,7 @@ export function AdminTimerControl() {
       </div>
 
       {/* Grid of Broadcast Controls */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7">
         {/* Card 1: "Starting Soon" Page */}
         <div
           className={`rounded-lg border p-4 flex flex-col justify-between gap-4 transition-all ${
@@ -454,6 +464,60 @@ export function AdminTimerControl() {
               >
                 <Film size={14} />
                 <span>Show Defusal Video</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Card: Live Leaderboard Presentation */}
+        <div
+          className={`rounded-lg border p-4 flex flex-col justify-between gap-4 transition-all ${
+            activeScreen === "leaderboard_presentation"
+              ? "border-purple-400/70 bg-purple-950/40 shadow-[0_0_25px_rgba(168,85,247,0.3)] ring-1 ring-purple-400/40"
+              : "border-cyan-400/20 bg-[#040814]/70"
+          }`}
+        >
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="font-terminal text-xs font-bold uppercase tracking-wider text-purple-300 flex items-center gap-1.5">
+                <BarChart3 size={14} />
+                Live Leaderboard
+              </span>
+              <span
+                className={`font-terminal rounded px-2 py-0.5 text-[10px] font-black uppercase ${
+                  activeScreen === "leaderboard_presentation"
+                    ? "border border-purple-400/60 bg-purple-400/20 text-purple-300"
+                    : "border border-slate-700 bg-slate-800 text-slate-400"
+                }`}
+              >
+                {activeScreen === "leaderboard_presentation" ? "ACTIVE" : "STANDBY"}
+              </span>
+            </div>
+            <p className="mt-2 text-xs text-slate-300 leading-relaxed">
+              Broadcasts the live competition leaderboard with podium and full standings matrix across all visitor screens.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            {activeScreen === "leaderboard_presentation" ? (
+              <button
+                type="button"
+                onClick={() => setScreen("leaderboard_presentation")}
+                disabled={screenBusy}
+                className="codefest-button ghost-button w-full border-red-500/50 bg-red-500/10 text-red-300 hover:bg-red-500/20 py-2.5 text-xs inline-flex items-center justify-center gap-2"
+              >
+                <EyeOff size={14} />
+                <span>Hide Live Leaderboard</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setScreen("leaderboard_presentation")}
+                disabled={screenBusy}
+                className="codefest-button signal-button w-full py-2.5 text-xs inline-flex items-center justify-center gap-2 border-purple-400/60 bg-purple-400/20 text-purple-200 hover:bg-purple-400/30"
+              >
+                <BarChart3 size={14} />
+                <span>Show Live Leaderboard</span>
               </button>
             )}
           </div>

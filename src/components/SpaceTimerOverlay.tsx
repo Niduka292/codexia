@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { WinnerRevealOverlay } from "@/components/WinnerRevealOverlay";
 import { DefusalVideoOverlay } from "@/components/DefusalVideoOverlay";
 import { IntroVideoOverlay } from "@/components/IntroVideoOverlay";
+import { LeaderboardPresentationOverlay } from "@/components/LeaderboardPresentationOverlay";
 
 const STARS = Array.from({ length: 70 }, (_, i) => ({
   left: (i * 37) % 100,
@@ -20,7 +21,8 @@ type BroadcastScreen =
   | "game_starting_soon"
   | "winner_reveal"
   | "defusal_video"
-  | "intro_video";
+  | "intro_video"
+  | "leaderboard_presentation";
 
 export function SpaceTimerOverlay() {
   const pathname = usePathname();
@@ -40,6 +42,8 @@ export function SpaceTimerOverlay() {
         setEndsAt(data.endsAt);
         if (data.activeScreen) {
           setActiveScreen(data.activeScreen);
+        } else if (data.leaderboardPresentation) {
+          setActiveScreen("leaderboard_presentation");
         } else if (data.introVideo) {
           setActiveScreen("intro_video");
         } else if (data.defusalVideo) {
@@ -80,6 +84,11 @@ export function SpaceTimerOverlay() {
 
   // Never block the admin dashboard
   if (pathname?.startsWith("/admin")) return null;
+
+  // Live Auto-Scroll Leaderboard Presentation screen
+  if (activeScreen === "leaderboard_presentation") {
+    return <LeaderboardPresentationOverlay />;
+  }
 
   // Intro Video screen
   if (activeScreen === "intro_video") {

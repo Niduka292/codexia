@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
+  BarChart3,
   Cpu,
   ExternalLink,
   EyeOff,
@@ -35,7 +36,13 @@ export function AdminDashboardClient({
   const [leaderboard, setLeaderboard] = useState<LeaderboardTeam[]>(initialLeaderboard);
   const [loading, setLoading] = useState(false);
   const [activeScreen, setActiveScreen] = useState<
-    "none" | "starting_soon" | "game_starting_soon" | "winner_reveal" | "defusal_video" | "intro_video"
+    | "none"
+    | "starting_soon"
+    | "game_starting_soon"
+    | "winner_reveal"
+    | "defusal_video"
+    | "intro_video"
+    | "leaderboard_presentation"
   >("none");
   const [screenLoading, setScreenLoading] = useState(false);
 
@@ -49,6 +56,8 @@ export function AdminDashboardClient({
       .then((data) => {
         if (data.activeScreen) {
           setActiveScreen(data.activeScreen);
+        } else if (data.leaderboardPresentation) {
+          setActiveScreen("leaderboard_presentation");
         } else if (data.introVideo) {
           setActiveScreen("intro_video");
         } else if (data.defusalVideo) {
@@ -65,7 +74,13 @@ export function AdminDashboardClient({
   }, []);
 
   async function setBroadcastScreen(
-    screen: "starting_soon" | "game_starting_soon" | "winner_reveal" | "defusal_video" | "intro_video"
+    screen:
+      | "starting_soon"
+      | "game_starting_soon"
+      | "winner_reveal"
+      | "defusal_video"
+      | "intro_video"
+      | "leaderboard_presentation"
   ) {
     setScreenLoading(true);
     const target = activeScreen === screen ? "none" : screen;
@@ -206,6 +221,29 @@ export function AdminDashboardClient({
                     <>
                       <Film size={13} className="text-red-400" />
                       Show Defusal Video
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBroadcastScreen("leaderboard_presentation")}
+                  disabled={screenLoading}
+                  className={`codefest-button px-3.5 py-2.5 text-xs inline-flex items-center gap-1.5 ${
+                    activeScreen === "leaderboard_presentation"
+                      ? "border-purple-400/70 bg-purple-400/25 text-purple-200 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
+                      : "ghost-button border-purple-400/30 text-purple-300/80 hover:text-purple-200"
+                  }`}
+                >
+                  {activeScreen === "leaderboard_presentation" ? (
+                    <>
+                      <EyeOff size={13} />
+                      Hide Live Leaderboard
+                    </>
+                  ) : (
+                    <>
+                      <BarChart3 size={13} className="text-purple-400" />
+                      Show Live Leaderboard
                     </>
                   )}
                 </button>
@@ -416,6 +454,29 @@ export function AdminDashboardClient({
                     <>
                       <Film size={13} className="text-red-400" />
                       Show Defusal Video
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBroadcastScreen("leaderboard_presentation")}
+                  disabled={screenLoading}
+                  className={`codefest-button px-3.5 py-3 text-xs inline-flex items-center gap-1.5 ${
+                    activeScreen === "leaderboard_presentation"
+                      ? "border-purple-400/70 bg-purple-400/25 text-purple-200 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
+                      : "ghost-button border-purple-400/30 text-purple-300/80 hover:text-purple-200"
+                  }`}
+                >
+                  {activeScreen === "leaderboard_presentation" ? (
+                    <>
+                      <EyeOff size={13} />
+                      Hide Live Leaderboard
+                    </>
+                  ) : (
+                    <>
+                      <BarChart3 size={13} className="text-purple-400" />
+                      Show Live Leaderboard
                     </>
                   )}
                 </button>

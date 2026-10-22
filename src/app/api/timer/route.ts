@@ -11,7 +11,8 @@ export type BroadcastScreen =
   | "game_starting_soon"
   | "winner_reveal"
   | "defusal_video"
-  | "intro_video";
+  | "intro_video"
+  | "leaderboard_presentation";
 
 export type RevealState = {
   rank3: boolean;
@@ -50,6 +51,7 @@ function snapshot() {
     winnerReveal: state.activeScreen === "winner_reveal",
     defusalVideo: state.activeScreen === "defusal_video",
     introVideo: state.activeScreen === "intro_video",
+    leaderboardPresentation: state.activeScreen === "leaderboard_presentation",
     revealState: state.revealState,
     now,
   };
@@ -73,7 +75,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    // Set activeScreen explicitly ("none", "starting_soon", "game_starting_soon", "winner_reveal", "defusal_video", "intro_video")
+    // Set activeScreen explicitly ("none", "starting_soon", "game_starting_soon", "winner_reveal", "defusal_video", "intro_video", "leaderboard_presentation")
     if (typeof body.activeScreen === "string") {
       if (
         body.activeScreen === "none" ||
@@ -81,7 +83,8 @@ export async function POST(request: Request) {
         body.activeScreen === "game_starting_soon" ||
         body.activeScreen === "winner_reveal" ||
         body.activeScreen === "defusal_video" ||
-        body.activeScreen === "intro_video"
+        body.activeScreen === "intro_video" ||
+        body.activeScreen === "leaderboard_presentation"
       ) {
         state.activeScreen = body.activeScreen;
         return NextResponse.json(snapshot(), noStore);
@@ -115,6 +118,12 @@ export async function POST(request: Request) {
     // Toggle introVideo
     if (typeof body.introVideo === "boolean") {
       state.activeScreen = body.introVideo ? "intro_video" : "none";
+      return NextResponse.json(snapshot(), noStore);
+    }
+
+    // Toggle leaderboardPresentation
+    if (typeof body.leaderboardPresentation === "boolean") {
+      state.activeScreen = body.leaderboardPresentation ? "leaderboard_presentation" : "none";
       return NextResponse.json(snapshot(), noStore);
     }
 
