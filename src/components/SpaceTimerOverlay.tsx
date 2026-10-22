@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { WinnerRevealOverlay } from "@/components/WinnerRevealOverlay";
+import { DefusalVideoOverlay } from "@/components/DefusalVideoOverlay";
+import { IntroVideoOverlay } from "@/components/IntroVideoOverlay";
 
 const STARS = Array.from({ length: 70 }, (_, i) => ({
   left: (i * 37) % 100,
@@ -12,7 +14,13 @@ const STARS = Array.from({ length: 70 }, (_, i) => ({
   delay: (i % 7) * 0.4,
 }));
 
-type BroadcastScreen = "none" | "starting_soon" | "game_starting_soon" | "winner_reveal";
+type BroadcastScreen =
+  | "none"
+  | "starting_soon"
+  | "game_starting_soon"
+  | "winner_reveal"
+  | "defusal_video"
+  | "intro_video";
 
 export function SpaceTimerOverlay() {
   const pathname = usePathname();
@@ -32,6 +40,12 @@ export function SpaceTimerOverlay() {
         setEndsAt(data.endsAt);
         if (data.activeScreen) {
           setActiveScreen(data.activeScreen);
+        } else if (data.introVideo) {
+          setActiveScreen("intro_video");
+        } else if (data.defusalVideo) {
+          setActiveScreen("defusal_video");
+        } else if (data.winnerReveal) {
+          setActiveScreen("winner_reveal");
         } else if (data.gameStartingSoon) {
           setActiveScreen("game_starting_soon");
         } else if (data.startingSoon) {
@@ -66,6 +80,16 @@ export function SpaceTimerOverlay() {
 
   // Never block the admin dashboard
   if (pathname?.startsWith("/admin")) return null;
+
+  // Intro Video screen
+  if (activeScreen === "intro_video") {
+    return <IntroVideoOverlay />;
+  }
+
+  // Defusal Video screen takes immediate prominence
+  if (activeScreen === "defusal_video") {
+    return <DefusalVideoOverlay />;
+  }
 
   // Podium / Winner Reveal screen takes highest prominence
   if (activeScreen === "winner_reveal") {

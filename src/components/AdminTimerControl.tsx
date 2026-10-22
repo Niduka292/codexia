@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   Crown,
   EyeOff,
+  Film,
   Lock,
   PartyPopper,
   Play,
@@ -17,7 +18,13 @@ import {
 
 const MAX_MINUTES = 30;
 
-type BroadcastScreen = "none" | "starting_soon" | "game_starting_soon" | "winner_reveal";
+type BroadcastScreen =
+  | "none"
+  | "starting_soon"
+  | "game_starting_soon"
+  | "winner_reveal"
+  | "defusal_video"
+  | "intro_video";
 
 type RevealState = {
   rank3: boolean;
@@ -49,6 +56,8 @@ export function AdminTimerControl() {
     startingSoon?: boolean;
     gameStartingSoon?: boolean;
     winnerReveal?: boolean;
+    defusalVideo?: boolean;
+    introVideo?: boolean;
     revealState?: RevealState;
     now: number;
   }) {
@@ -59,6 +68,10 @@ export function AdminTimerControl() {
     }
     if (data.activeScreen) {
       setActiveScreen(data.activeScreen);
+    } else if (data.introVideo) {
+      setActiveScreen("intro_video");
+    } else if (data.defusalVideo) {
+      setActiveScreen("defusal_video");
     } else if (data.winnerReveal) {
       setActiveScreen("winner_reveal");
     } else if (data.gameStartingSoon) {
@@ -194,7 +207,17 @@ export function AdminTimerControl() {
 
         {/* Global indicator */}
         <div className="flex items-center gap-2">
-          {activeScreen === "winner_reveal" ? (
+          {activeScreen === "intro_video" ? (
+            <span className="font-terminal inline-flex items-center gap-1.5 rounded-full border border-cyan-400/60 bg-cyan-400/20 px-3 py-1 text-xs font-black text-cyan-300 animate-pulse shadow-[0_0_15px_rgba(0,229,255,0.4)]">
+              <span className="h-2 w-2 rounded-full bg-cyan-400" />
+              Users Seeing: "Intro Video" 🎬
+            </span>
+          ) : activeScreen === "defusal_video" ? (
+            <span className="font-terminal inline-flex items-center gap-1.5 rounded-full border border-red-500/60 bg-red-500/20 px-3 py-1 text-xs font-black text-red-300 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.4)]">
+              <span className="h-2 w-2 rounded-full bg-red-500" />
+              Users Seeing: "Defusal Video" 🎬
+            </span>
+          ) : activeScreen === "winner_reveal" ? (
             <span className="font-terminal inline-flex items-center gap-1.5 rounded-full border border-yellow-400/60 bg-yellow-400/20 px-3 py-1 text-xs font-black text-yellow-300 animate-pulse shadow-[0_0_15px_rgba(251,191,36,0.4)]">
               <span className="h-2 w-2 rounded-full bg-yellow-400" />
               Users Seeing: "Podium / Winner Reveal" 🏆
@@ -218,8 +241,8 @@ export function AdminTimerControl() {
         </div>
       </div>
 
-      {/* Grid of 4 Broadcast Controls */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {/* Grid of Broadcast Controls */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {/* Card 1: "Starting Soon" Page */}
         <div
           className={`rounded-lg border p-4 flex flex-col justify-between gap-4 transition-all ${
@@ -323,6 +346,114 @@ export function AdminTimerControl() {
               >
                 <Rocket size={14} />
                 <span>Show "Game Starting Soon"</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Card: CODEXIA Intro Video */}
+        <div
+          className={`rounded-lg border p-4 flex flex-col justify-between gap-4 transition-all ${
+            activeScreen === "intro_video"
+              ? "border-cyan-400/70 bg-cyan-950/40 shadow-[0_0_25px_rgba(0,229,255,0.3)] ring-1 ring-cyan-400/40"
+              : "border-cyan-400/20 bg-[#040814]/70"
+          }`}
+        >
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="font-terminal text-xs font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-1.5">
+                <Film size={14} />
+                Intro Video
+              </span>
+              <span
+                className={`font-terminal rounded px-2 py-0.5 text-[10px] font-black uppercase ${
+                  activeScreen === "intro_video"
+                    ? "border border-cyan-400/60 bg-cyan-400/20 text-cyan-300"
+                    : "border border-slate-700 bg-slate-800 text-slate-400"
+                }`}
+              >
+                {activeScreen === "intro_video" ? "ACTIVE" : "STANDBY"}
+              </span>
+            </div>
+            <p className="mt-2 text-xs text-slate-300 leading-relaxed">
+              Broadcasts the <strong>CODEXIA Intro Trailer</strong> across all visitor screens with auto-play and sound controls.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            {activeScreen === "intro_video" ? (
+              <button
+                type="button"
+                onClick={() => setScreen("intro_video")}
+                disabled={screenBusy}
+                className="codefest-button ghost-button w-full border-red-500/50 bg-red-500/10 text-red-300 hover:bg-red-500/20 py-2.5 text-xs inline-flex items-center justify-center gap-2"
+              >
+                <EyeOff size={14} />
+                <span>Hide Intro Video</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setScreen("intro_video")}
+                disabled={screenBusy}
+                className="codefest-button signal-button w-full py-2.5 text-xs inline-flex items-center justify-center gap-2 border-cyan-400/60 bg-cyan-400/20 text-cyan-200 hover:bg-cyan-400/30"
+              >
+                <Film size={14} />
+                <span>Show Intro Video</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Card: Defusal Video Protocol */}
+        <div
+          className={`rounded-lg border p-4 flex flex-col justify-between gap-4 transition-all ${
+            activeScreen === "defusal_video"
+              ? "border-red-500/70 bg-red-950/40 shadow-[0_0_25px_rgba(239,68,68,0.3)] ring-1 ring-red-400/40"
+              : "border-cyan-400/20 bg-[#040814]/70"
+          }`}
+        >
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="font-terminal text-xs font-bold uppercase tracking-wider text-red-300 flex items-center gap-1.5">
+                <Film size={14} />
+                Defusal Video
+              </span>
+              <span
+                className={`font-terminal rounded px-2 py-0.5 text-[10px] font-black uppercase ${
+                  activeScreen === "defusal_video"
+                    ? "border border-red-500/60 bg-red-500/20 text-red-300"
+                    : "border border-slate-700 bg-slate-800 text-slate-400"
+                }`}
+              >
+                {activeScreen === "defusal_video" ? "ACTIVE" : "STANDBY"}
+              </span>
+            </div>
+            <p className="mt-2 text-xs text-slate-300 leading-relaxed">
+              Broadcasts the <strong>Defusal Briefing Video</strong> across all visitor screens with auto-play and sound controls.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            {activeScreen === "defusal_video" ? (
+              <button
+                type="button"
+                onClick={() => setScreen("defusal_video")}
+                disabled={screenBusy}
+                className="codefest-button ghost-button w-full border-red-500/50 bg-red-500/10 text-red-300 hover:bg-red-500/20 py-2.5 text-xs inline-flex items-center justify-center gap-2"
+              >
+                <EyeOff size={14} />
+                <span>Hide Defusal Video</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setScreen("defusal_video")}
+                disabled={screenBusy}
+                className="codefest-button signal-button w-full py-2.5 text-xs inline-flex items-center justify-center gap-2 border-red-500/60 bg-red-500/20 text-red-200 hover:bg-red-500/30"
+              >
+                <Film size={14} />
+                <span>Show Defusal Video</span>
               </button>
             )}
           </div>

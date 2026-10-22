@@ -5,7 +5,13 @@ export const dynamic = "force-dynamic";
 
 const MAX_MINUTES = 30;
 
-export type BroadcastScreen = "none" | "starting_soon" | "game_starting_soon" | "winner_reveal";
+export type BroadcastScreen =
+  | "none"
+  | "starting_soon"
+  | "game_starting_soon"
+  | "winner_reveal"
+  | "defusal_video"
+  | "intro_video";
 
 export type RevealState = {
   rank3: boolean;
@@ -42,6 +48,8 @@ function snapshot() {
     startingSoon: state.activeScreen === "starting_soon",
     gameStartingSoon: state.activeScreen === "game_starting_soon",
     winnerReveal: state.activeScreen === "winner_reveal",
+    defusalVideo: state.activeScreen === "defusal_video",
+    introVideo: state.activeScreen === "intro_video",
     revealState: state.revealState,
     now,
   };
@@ -65,13 +73,15 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    // Set activeScreen explicitly ("none", "starting_soon", "game_starting_soon", "winner_reveal")
+    // Set activeScreen explicitly ("none", "starting_soon", "game_starting_soon", "winner_reveal", "defusal_video", "intro_video")
     if (typeof body.activeScreen === "string") {
       if (
         body.activeScreen === "none" ||
         body.activeScreen === "starting_soon" ||
         body.activeScreen === "game_starting_soon" ||
-        body.activeScreen === "winner_reveal"
+        body.activeScreen === "winner_reveal" ||
+        body.activeScreen === "defusal_video" ||
+        body.activeScreen === "intro_video"
       ) {
         state.activeScreen = body.activeScreen;
         return NextResponse.json(snapshot(), noStore);
@@ -93,6 +103,18 @@ export async function POST(request: Request) {
     // Toggle winnerReveal
     if (typeof body.winnerReveal === "boolean") {
       state.activeScreen = body.winnerReveal ? "winner_reveal" : "none";
+      return NextResponse.json(snapshot(), noStore);
+    }
+
+    // Toggle defusalVideo
+    if (typeof body.defusalVideo === "boolean") {
+      state.activeScreen = body.defusalVideo ? "defusal_video" : "none";
+      return NextResponse.json(snapshot(), noStore);
+    }
+
+    // Toggle introVideo
+    if (typeof body.introVideo === "boolean") {
+      state.activeScreen = body.introVideo ? "intro_video" : "none";
       return NextResponse.json(snapshot(), noStore);
     }
 

@@ -6,6 +6,7 @@ import {
   Cpu,
   ExternalLink,
   EyeOff,
+  Film,
   FileSpreadsheet,
   GitFork,
   LockKeyhole,
@@ -33,7 +34,9 @@ export function AdminDashboardClient({
   const [registrations] = useState<RegistrationRecord[]>(initialRegistrations);
   const [leaderboard, setLeaderboard] = useState<LeaderboardTeam[]>(initialLeaderboard);
   const [loading, setLoading] = useState(false);
-  const [activeScreen, setActiveScreen] = useState<"none" | "starting_soon" | "game_starting_soon" | "winner_reveal">("none");
+  const [activeScreen, setActiveScreen] = useState<
+    "none" | "starting_soon" | "game_starting_soon" | "winner_reveal" | "defusal_video" | "intro_video"
+  >("none");
   const [screenLoading, setScreenLoading] = useState(false);
 
   useEffect(() => {
@@ -46,6 +49,10 @@ export function AdminDashboardClient({
       .then((data) => {
         if (data.activeScreen) {
           setActiveScreen(data.activeScreen);
+        } else if (data.introVideo) {
+          setActiveScreen("intro_video");
+        } else if (data.defusalVideo) {
+          setActiveScreen("defusal_video");
         } else if (data.winnerReveal) {
           setActiveScreen("winner_reveal");
         } else if (data.gameStartingSoon) {
@@ -57,7 +64,9 @@ export function AdminDashboardClient({
       .catch(() => {});
   }, []);
 
-  async function setBroadcastScreen(screen: "starting_soon" | "game_starting_soon" | "winner_reveal") {
+  async function setBroadcastScreen(
+    screen: "starting_soon" | "game_starting_soon" | "winner_reveal" | "defusal_video" | "intro_video"
+  ) {
     setScreenLoading(true);
     const target = activeScreen === screen ? "none" : screen;
     try {
@@ -151,6 +160,52 @@ export function AdminDashboardClient({
                     <>
                       <Rocket size={13} className="text-amber-300" />
                       Show "Game Starting Soon"
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBroadcastScreen("intro_video")}
+                  disabled={screenLoading}
+                  className={`codefest-button px-3.5 py-2.5 text-xs inline-flex items-center gap-1.5 ${
+                    activeScreen === "intro_video"
+                      ? "border-cyan-400/70 bg-cyan-400/25 text-cyan-200 shadow-[0_0_20px_rgba(0,229,255,0.4)]"
+                      : "ghost-button border-cyan-400/30 text-cyan-300/80 hover:text-cyan-200"
+                  }`}
+                >
+                  {activeScreen === "intro_video" ? (
+                    <>
+                      <EyeOff size={13} />
+                      Hide Intro Video
+                    </>
+                  ) : (
+                    <>
+                      <Film size={13} className="text-cyan-400" />
+                      Show Intro Video
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBroadcastScreen("defusal_video")}
+                  disabled={screenLoading}
+                  className={`codefest-button px-3.5 py-2.5 text-xs inline-flex items-center gap-1.5 ${
+                    activeScreen === "defusal_video"
+                      ? "border-red-500/70 bg-red-500/25 text-red-200 shadow-[0_0_20px_rgba(239,68,68,0.4)]"
+                      : "ghost-button border-red-500/30 text-red-300/80 hover:text-red-200"
+                  }`}
+                >
+                  {activeScreen === "defusal_video" ? (
+                    <>
+                      <EyeOff size={13} />
+                      Hide Defusal Video
+                    </>
+                  ) : (
+                    <>
+                      <Film size={13} className="text-red-400" />
+                      Show Defusal Video
                     </>
                   )}
                 </button>
@@ -315,6 +370,52 @@ export function AdminDashboardClient({
                     <>
                       <Rocket size={13} className="text-amber-300" />
                       Show "Game Starting Soon"
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBroadcastScreen("intro_video")}
+                  disabled={screenLoading}
+                  className={`codefest-button px-3.5 py-3 text-xs inline-flex items-center gap-1.5 ${
+                    activeScreen === "intro_video"
+                      ? "border-cyan-400/70 bg-cyan-400/25 text-cyan-200 shadow-[0_0_20px_rgba(0,229,255,0.4)]"
+                      : "ghost-button border-cyan-400/30 text-cyan-300/80 hover:text-cyan-200"
+                  }`}
+                >
+                  {activeScreen === "intro_video" ? (
+                    <>
+                      <EyeOff size={13} />
+                      Hide Intro Video
+                    </>
+                  ) : (
+                    <>
+                      <Film size={13} className="text-cyan-400" />
+                      Show Intro Video
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBroadcastScreen("defusal_video")}
+                  disabled={screenLoading}
+                  className={`codefest-button px-3.5 py-3 text-xs inline-flex items-center gap-1.5 ${
+                    activeScreen === "defusal_video"
+                      ? "border-red-500/70 bg-red-500/25 text-red-200 shadow-[0_0_20px_rgba(239,68,68,0.4)]"
+                      : "ghost-button border-red-500/30 text-red-300/80 hover:text-red-200"
+                  }`}
+                >
+                  {activeScreen === "defusal_video" ? (
+                    <>
+                      <EyeOff size={13} />
+                      Hide Defusal Video
+                    </>
+                  ) : (
+                    <>
+                      <Film size={13} className="text-red-400" />
+                      Show Defusal Video
                     </>
                   )}
                 </button>
